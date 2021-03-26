@@ -5,6 +5,8 @@ import imgui
 from imgui.integrations.glfw import GlfwRenderer
 from PIL import Image
 import numpy
+from IGNode import *
+from IGGraph import *
 #from testwindow import show_test_window
 
 NODE_WINDOW_PADDING = imgui.Vec2(8.0, 8.0)
@@ -12,37 +14,6 @@ NODE_WINDOW_PADDING = imgui.Vec2(8.0, 8.0)
 def add(vect1, vect2):
     res = imgui.Vec2(vect1.x + vect2.x, vect1.y + vect2.y)
     return res
-
-class NodeInput:
-    def __init__(self, ):
-        self.name = "input"
-
-class NodeOutput:
-    def __init__(self, ):
-        self.name = "output"
-
-class NodeLink:
-    def __init__(self, input_idx, input_slot, output_idx, output_slot):
-        self.input_idx = input_idx
-        self.input_slot = input_slot
-        self.output_idx = output_idx
-        self.output_slot = output_slot
-
-class Node:
-    def __init__(self, id, name, pos, value, input_count, output_count):
-        self.id = id
-        self.name = name
-        self.pos = pos
-        self.value = value
-        self.size = imgui.Vec2(0,0)
-        self.inputs = [NodeInput() for _ in range(input_count)]
-        self.outputs = [NodeOutput() for _ in range(output_count)]
-
-    def get_intput_slot_pos(self, slot_no):
-        return imgui.Vec2(self.pos.x, self.pos.y + self.size.y*((slot_no+1) / (len(self.inputs)+1) ))
-
-    def get_output_slot_pos(self, slot_no):
-        return imgui.Vec2(self.pos.x + self.size.x, self.pos.y + self.size.y*((slot_no+1) / (len(self.outputs)+1) ))
 
 def load_image(image_name):
     image = Image.open(image_name).transpose( Image.FLIP_TOP_BOTTOM );
@@ -64,20 +35,22 @@ def load_image(image_name):
 def main():
 
     # states -------------------------
-    nodes = []
-    links = []
     scrolling = imgui.Vec2(0, 0)
 
-    nodes.append(Node(0, "MainTex", imgui.Vec2(40, 50), 0.5, 1, 1))
-    nodes.append(Node(1, "BumpMap", imgui.Vec2(40, 150), 0.42, 1, 1))
-    nodes.append(Node(2, "Combine", imgui.Vec2(270, 80), 1.0, 2, 2))
+    iggraph = IGGraph()
+    iggraph.nodes.append(IGNode(0, "MainTex", imgui.Vec2(40, 50), 0.5, 1, 1))
+    iggraph.nodes.append(IGNode(1, "BumpMap", imgui.Vec2(40, 150), 0.42, 1, 1))
+    iggraph.nodes.append(IGNode(2, "Combine", imgui.Vec2(270, 80), 1.0, 2, 2))
+    iggraph.nodes.append(IGCreateImage(3))
 
-    links.append(NodeLink(0,0,2,0))
-    links.append(NodeLink(1,0,2,1))
+    iggraph.links.append(NodeLink(0,0,2,0))
+    iggraph.links.append(NodeLink(1,0,2,1))
 
     node_hovered_in_scene = -1
     node_selected = -1
 
+    io_anchors_width = 10
+    
     # states -------------------------
 
     imgui.create_context()
@@ -138,9 +111,9 @@ def main():
         # Display links
         draw_list.channels_split(2)
         draw_list.channels_set_current(0)
-        for link in links:
-            node_inp = nodes[link.input_idx]
-            node_out = nodes[link.output_idx]
+        for link in iggraph.links:
+            node_inp = iggraph.nodes[link.input_idx]
+            node_out = iggraph.nodes[link.output_idx]
             p1 = add(offset, node_inp.get_intput_slot_pos(link.input_slot))
             p2 = add(offset, node_out.get_output_slot_pos(link.output_slot))
             #print(p1)
@@ -148,7 +121,7 @@ def main():
             draw_list.add_line(p1.x, p1.y, p2.x, p2.y, imgui.get_color_u32_rgba(1,1,0,1), 3)
 
         # Display nodes
-        for node in nodes:
+        for node in iggraph.nodes:
             imgui.push_id(str(node.id))
             node_rect_min = add(offset, node.pos)
             draw_list.channels_set_current(1) # foreground
@@ -159,8 +132,9 @@ def main():
             test = add(node_rect_min, NODE_WINDOW_PADDING)
             imgui.set_cursor_screen_position(add(node_rect_min, NODE_WINDOW_PADDING))
             imgui.begin_group()
-            imgui.text("Hello")
-            imgui.text(str(node_selected))
+            imgui.text("")
+            imgui.text(node.name)
+            imgui.text("")
             imgui.end_group()
 
             # save size
@@ -171,7 +145,7 @@ def main():
             #display node box
             draw_list.channels_set_current(0) # background
             imgui.set_cursor_screen_position(node_rect_min)
-            imgui.button("node", node.size.x, node.size.y) # TODO invisible_button
+            imgui.button("", node.size.x, node.size.y) # TODO invisible_button
             if imgui.is_item_hovered():
                 node_hovered_in_scene = node.id
                 # open_context_menu |= ImGui::IsMouseClicked(1)
@@ -185,12 +159,18 @@ def main():
             draw_list.add_rect_filled(node_rect_min.x, node_rect_min.y, node_rect_max.x, node_rect_max.y, imgui.get_color_u32_rgba(1,0,0,0.5), 5)
 
             for node_input_index in range(len(node.inputs)):
-                center = add(offset, node.get_intput_slot_pos(node_input_index))
-                draw_list.add_circle_filled(center.x, center.y, 5, imgui.get_color_u32_rgba(0,1,0,1))
+                center = node.get_intput_slot_pos(node_input_index)
+                center_with_offset = add(offset, center)
+                imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
+                imgui.button("", io_anchors_width, io_anchors_width) # TODO invisible_button
+                draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, imgui.get_color_u32_rgba(0,1,0,1))
 
             for node_output_index in range(len(node.outputs)):
-                center = add(offset, node.get_output_slot_pos(node_output_index))
-                draw_list.add_circle_filled(center.x, center.y, 5, imgui.get_color_u32_rgba(0,1,1,1))
+                center = node.get_output_slot_pos(node_input_index)
+                center_with_offset = add(offset, center)
+                imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
+                imgui.button("", io_anchors_width, io_anchors_width) # TODO invisible_button
+                draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, imgui.get_color_u32_rgba(0,1,1,1))
 
             imgui.pop_id()
         draw_list.channels_merge()
