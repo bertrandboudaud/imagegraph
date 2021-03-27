@@ -73,9 +73,9 @@ def main():
     scrolling = imgui.Vec2(0, 0)
 
     iggraph = IGGraph()
-    image_create = IGCreateImage(3)
+    image_load = IGLoadImage(3)
     image_filter = IGFilterImage(4)
-    iggraph.nodes.append(image_create)
+    iggraph.nodes.append(image_load)
     iggraph.nodes.append(image_filter)
 
 #    iggraph.links.append(NodeLink(image_create.outputs[0],image_filter.inputs[0]))
@@ -197,7 +197,7 @@ def main():
                 imgui.button("input", io_anchors_width, io_anchors_width) # TODO invisible_button
                 if imgui.is_item_hovered():
                     if parameter_selected and mouse_just_release:
-                        iggraph.links.append(NodeLink(image_create.outputs[0],image_filter.inputs[0]))
+                        iggraph.links.append(NodeLink(image_load.outputs[0],image_filter.inputs[0]))
                         # todo forbid 2 node links
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, imgui.get_color_u32_rgba(0,1,0,1))
 

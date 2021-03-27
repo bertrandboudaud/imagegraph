@@ -28,6 +28,12 @@ class IGGraph:
             if add_node:
                found_nodes.append(node) 
         return found_nodes
+    
+    def set_inputs(self, node):
+        for parameter in node.inputs:
+            linked_outputs = self.find_input_parameter_links(parameter)
+            for output in linked_outputs:
+                parameter.image = output.image ## todo other types of parameters
 
     def run(self):
         self.run_nodes = []
@@ -40,6 +46,7 @@ class IGGraph:
         if len(node_to_run) == 0:
             return False
         for node in node_to_run:
+            self.set_inputs(node)
             node.process()
             self.run_nodes.append(node)
         return True
