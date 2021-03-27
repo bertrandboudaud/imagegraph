@@ -15,6 +15,10 @@ def add(vect1, vect2):
     res = imgui.Vec2(vect1.x + vect2.x, vect1.y + vect2.y)
     return res
 
+def init_texture():
+    image_texture = gl.glGenTextures(1)
+    return image_texture
+
 def load_image(image_name):
     image = Image.open(image_name).transpose( Image.FLIP_TOP_BOTTOM );
     textureData = numpy.array(list(image.getdata()), numpy.uint8)
@@ -32,25 +36,41 @@ def load_image(image_name):
     return texture, width, height
 
 
+def set_texture(image, texture):
+    textureData = numpy.array(list(image.getdata()), numpy.uint8)
+
+    width = image.width
+    height = image.height
+
+    gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
+    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
+    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
+    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA,
+                    gl.GL_UNSIGNED_BYTE, textureData)
+
+    return texture, width, height
+
 def main():
 
     # states -------------------------
     scrolling = imgui.Vec2(0, 0)
 
     iggraph = IGGraph()
-    iggraph.nodes.append(IGNode(0, "MainTex", imgui.Vec2(40, 50), 0.5, 1, 1))
-    iggraph.nodes.append(IGNode(1, "BumpMap", imgui.Vec2(40, 150), 0.42, 1, 1))
-    iggraph.nodes.append(IGNode(2, "Combine", imgui.Vec2(270, 80), 1.0, 2, 2))
     iggraph.nodes.append(IGCreateImage(3))
+    iggraph.nodes.append(IGFilterImage(4))
 
-    iggraph.links.append(NodeLink(0,0,2,0))
-    iggraph.links.append(NodeLink(1,0,2,1))
+#    iggraph.links.append(NodeLink(0,0,2,0))
+#    iggraph.links.append(NodeLink(1,0,2,1))
 
     node_hovered_in_scene = -1
     node_selected = -1
 
     io_anchors_width = 10
     
+    image_width = 0
+    image_height = 0
+    image_texture = None
+
     # states -------------------------
 
     imgui.create_context()
@@ -58,7 +78,8 @@ def main():
     impl = GlfwRenderer(window)
     io = imgui.get_io()
 
-    image_texture, image_width, image_height = load_image("c:\\tmp\\Capture.PNG")
+    # image_texture, image_width, image_height = load_image("c:\\tmp\\Capture.PNG")
+    image_texture = init_texture()
 
     while not glfw.window_should_close(window):
         glfw.poll_events()
@@ -84,7 +105,8 @@ def main():
         #------------------------------------------------------------
         imgui.begin("Output preview", True)
         imgui.text('An image:')
-        imgui.image(image_texture, image_width, image_height)
+        if image_texture is not None:
+            imgui.image(image_texture, image_width, image_height)
         imgui.end()
 
         #------------------------------------------------------------
@@ -166,10 +188,11 @@ def main():
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, imgui.get_color_u32_rgba(0,1,0,1))
 
             for node_output_index in range(len(node.outputs)):
-                center = node.get_output_slot_pos(node_input_index)
+                center = node.get_output_slot_pos(node_output_index)
                 center_with_offset = add(offset, center)
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
-                imgui.button("", io_anchors_width, io_anchors_width) # TODO invisible_button
+                if (imgui.button("test", io_anchors_width, io_anchors_width)): # TODO invisible_button
+                     image_texture, image_width, image_height = set_texture(node.outputs[node_output_index].image, image_texture)
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, imgui.get_color_u32_rgba(0,1,1,1))
 
             imgui.pop_id()
