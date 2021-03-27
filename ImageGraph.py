@@ -7,7 +7,6 @@ from PIL import Image
 import numpy
 from IGNode import *
 from IGGraph import *
-#from testwindow import show_test_window
 
 NODE_WINDOW_PADDING = imgui.Vec2(8.0, 8.0)
 
@@ -51,7 +50,7 @@ def set_texture(image, texture):
     return texture, width, height
 
 # draw link between 2 params
-def draw_link_param_to_param(draw_list, offset, input_parameter, output_parameter):
+def draw_link_param_to_param(draw_list, offset, output_parameter, input_parameter):
     node_inp = input_parameter.owner
     node_out = output_parameter.owner
     p1 = add(offset, node_inp.get_intput_slot_pos(input_parameter))
@@ -137,7 +136,8 @@ def main():
         NODE_SLOT_RADIUS = 4.0
 
         # create our child canvas
-        imgui.text("Hold middle mouse button to scroll")
+        if imgui.button("run"):
+            iggraph.run()
         # imgui.same_line(imgui.get_window_width() - 100)
         imgui.push_style_var(imgui.STYLE_FRAME_PADDING, imgui.Vec2(1, 1))
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, imgui.Vec2(0, 0))

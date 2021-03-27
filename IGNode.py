@@ -1,7 +1,7 @@
 import imgui # TODO remove this dependency
 from IGParameter import *
 class NodeLink:
-    def __init__(self, input_parameter, output_parameter):
+    def __init__(self, output_parameter, input_parameter):
         self.input_parameter = input_parameter
         self.output_parameter = output_parameter
 
@@ -33,8 +33,19 @@ class IGNode:
 class IGCreateImage(IGNode):
     def __init__(self, id):
         super().__init__(id, "Create Image", imgui.Vec2(50,50))
-        self.outputs.append(IGParameterImage("created image", self))
+        self.created_image = IGParameterImage("created image", self) 
+        self.outputs.append(self.created_image)
+    
+    def process(self):
+        mode = 'RGBA'
+        size = (128, 128)
+        color = (73, 109, 137)
+        self.created_image.image = Image.new(mode, size, color)
+
 class IGFilterImage(IGNode):
     def __init__(self, id):
         super().__init__(id, "Filter Image", imgui.Vec2(200,100))
         self.inputs.append(IGParameterImage("source image", self))
+
+    def process(self):
+        print("IGFilterImage process")
