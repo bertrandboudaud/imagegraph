@@ -1,11 +1,9 @@
 import imgui # TODO remove this dependency
 from IGParameter import *
 class NodeLink:
-    def __init__(self, input_idx, input_slot, output_idx, output_slot):
-        self.input_idx = input_idx
-        self.input_slot = input_slot
-        self.output_idx = output_idx
-        self.output_slot = output_slot
+    def __init__(self, input_parameter, output_parameter):
+        self.input_parameter = input_parameter
+        self.output_parameter = output_parameter
 
 class IGNode:
     def __init__(self, id, name, pos):
@@ -16,17 +14,27 @@ class IGNode:
         self.inputs = []
         self.outputs = []
 
-    def get_intput_slot_pos(self, slot_no):
+    def get_intput_slot_pos(self, parameter):
+        slot_no = 0
+        for input_parameter in self.inputs: # replace with map and name of the parameter
+            if input_parameter == parameter:
+                break
+            slot_no = slot_no + 1 
         return imgui.Vec2(self.pos.x, self.pos.y + self.size.y*((slot_no+1) / (len(self.inputs)+1) ))
 
-    def get_output_slot_pos(self, slot_no):
+    def get_output_slot_pos(self, parameter):
+        slot_no = 0
+        for output_parameter in self.outputs: # replace with map and name of the parameter
+            if output_parameter == parameter:
+                break
+            slot_no = slot_no + 1 
         return imgui.Vec2(self.pos.x + self.size.x, self.pos.y + self.size.y*((slot_no+1) / (len(self.outputs)+1) ))
 
 class IGCreateImage(IGNode):
     def __init__(self, id):
         super().__init__(id, "Create Image", imgui.Vec2(50,50))
-        self.outputs.append(IGParameterImage("created image"))
+        self.outputs.append(IGParameterImage("created image", self))
 class IGFilterImage(IGNode):
     def __init__(self, id):
         super().__init__(id, "Filter Image", imgui.Vec2(200,100))
-        self.inputs.append(IGParameterImage("source image"))
+        self.inputs.append(IGParameterImage("source image", self))
