@@ -14,4 +14,4 @@ class IGParameterImage(IGParameter):
         mode = 'RGB'
         size = (128, 128)
         color = (73, 109, 137)
-        self.image = Image.new(mode, size, color)
+        self.image = None # Image.new(mode, size, color)

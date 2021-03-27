@@ -206,7 +206,8 @@ def main():
                 center_with_offset = add(offset, center)
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
                 if (imgui.button("output", io_anchors_width, io_anchors_width)): # TODO invisible_button
-                     image_texture, image_width, image_height = set_texture(node.outputs[node_output_index].image, image_texture)
+                    if parameter.image:
+                        image_texture, image_width, image_height = set_texture(parameter.image, image_texture)
                 creating_link_active = imgui.is_item_active()
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, imgui.get_color_u32_rgba(0,1,1,1))
                 if creating_link_active:
