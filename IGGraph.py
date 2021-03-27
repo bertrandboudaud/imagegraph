@@ -19,7 +19,8 @@ class IGGraph:
         found_nodes = []
         for node in self.nodes:
             linked_outputs = [] # outputs linked to all inputs of the node
-            for parameter in node.inputs:
+            for parameter_name in node.inputs:
+                parameter = node.inputs[parameter_name]
                 linked_outputs = linked_outputs + self.find_input_parameter_links(parameter)
             add_node = not node in self.run_nodes
             for output in linked_outputs:
@@ -31,7 +32,8 @@ class IGGraph:
         return found_nodes
     
     def set_inputs(self, node):
-        for parameter in node.inputs:
+        for parameter_name in node.inputs:
+            parameter = node.inputs[parameter_name]
             linked_outputs = self.find_input_parameter_links(parameter)
             for output in linked_outputs:
                 parameter.image = output.image ## todo other types of parameters

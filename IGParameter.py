@@ -2,13 +2,12 @@ import imgui # TODO remove this dependency
 from PIL import Image
 
 class IGParameter:
-    def __init__(self, id, type, owner, output = True):
-        self.id = id
+    def __init__(self, type):
+        self.id = ""
         self.type = type
-        self.output = output
-        self.owner = owner
+        self.owner = None
     
 class IGParameterImage(IGParameter):
-    def __init__(self, id, owner):
-        super().__init__(id, "Image", owner)
+    def __init__(self):
+        super().__init__("Image")
         self.image = None

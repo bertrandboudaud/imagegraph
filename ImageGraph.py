@@ -234,19 +234,21 @@ def main():
                 imgui.end_tooltip()
 
             # input parameters
-            for parameter in node.inputs:
+            for parameter_name in node.inputs:
+                parameter = node.inputs[parameter_name]
                 center = node.get_intput_slot_pos(parameter)
                 center_with_offset = add(offset, center)
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
                 imgui.invisible_button("input", io_anchors_width, io_anchors_width)
                 if imgui.is_item_hovered():
                     if parameter_selected and mouse_just_release:
-                        iggraph.links.append(NodeLink(image_load.outputs[0],image_filter.inputs[0]))
+                        iggraph.links.append(NodeLink(parameter_selected, parameter))
                         # todo forbid 2 node links
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
 
             # output parameters
-            for parameter in node.outputs:
+            for parameter_name in node.outputs:
+                parameter = node.outputs[parameter_name]
                 center = node.get_output_slot_pos(parameter)
                 center_with_offset = add(offset, center)
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
