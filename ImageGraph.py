@@ -55,21 +55,30 @@ def draw_link_param_to_param(draw_list, offset, output_parameter, input_paramete
     node_out = output_parameter.owner
     p1 = add(offset, node_inp.get_intput_slot_pos(input_parameter))
     p2 = add(offset, node_out.get_output_slot_pos(output_parameter))
-    draw_link(draw_list, p1.x, p1.y, p2.x, p2.y)
+    draw_link(draw_list, p1.x, p1.y, p2.x, p2.y, output_parameter)
 
 # draw link between 1 param, 1 point
 def draw_link_param_to_point(draw_list, offset, parameter, p2_x, p2_y):
     node_out = parameter.owner
     p1 = add(offset, node_out.get_output_slot_pos(parameter))
-    draw_link(draw_list, p1.x, p1.y, p2_x, p2_y)
+    draw_link(draw_list, p1.x, p1.y, p2_x, p2_y, parameter)
 
 # draw link between 2 points
-def draw_link(draw_list, p1_x, p1_y, p2_x, p2_y):
-    draw_list.add_line(p1_x, p1_y, p2_x, p2_y, imgui.get_color_u32_rgba(1,1,0,1), 3)
+def draw_link(draw_list, p1_x, p1_y, p2_x, p2_y, parameter):
+    draw_list.add_line(p1_x, p1_y, p2_x, p2_y,  get_parameter_color(parameter), 3)
+
+def get_parameter_color(parameter):
+    if (parameter.type == "Image"):
+        return imgui.get_color_u32_rgba(1,0,0,0.7)
+    else:
+        # unknown
+        return imgui.get_color_u32_rgba(1,1,1,0.2)
 
 def main():
 
+
     # states -------------------------
+    
     scrolling = imgui.Vec2(0, 0)
 
     iggraph = IGGraph()
@@ -102,6 +111,12 @@ def main():
     # image_texture, image_width, image_height = load_image("c:\\tmp\\Capture.PNG")
     image_texture = init_texture()
 
+    # colors -------------------------
+    node_color_not_run = imgui.get_color_u32_rgba(1,0,0,0.5)
+    node_color_not_run_hovered = imgui.get_color_u32_rgba(1,0,0,0.7)
+    node_color_run = imgui.get_color_u32_rgba(0,1,0,0.5)
+    node_color_run_hovered = imgui.get_color_u32_rgba(0,1,0,0.7)
+
     while not glfw.window_should_close(window):
         glfw.poll_events()
         impl.process_inputs()
@@ -125,9 +140,20 @@ def main():
 
         #------------------------------------------------------------
         imgui.begin("Output preview", True)
-        imgui.text('An image:')
-        if image_texture is not None:
-            imgui.image(image_texture, image_width, image_height)
+        if image_texture is not None and image_width>0 and image_height>0:
+            # imgui.image(image_texture, image_width, image_height)
+            window_width = imgui.get_window_width()
+            display_width = 0
+            display_height = 0
+            if image_width >= image_height:
+                display_width = window_width
+                display_height = image_height / (image_width/float(display_width))
+            else:
+                display_height = window_width
+                display_width = image_width / (image_height/float(display_height))
+            imgui.image(image_texture, display_width, display_height)
+            imgui.text("width: " + str(image_width))
+            imgui.text("height: " + str(image_height))
         imgui.end()
 
         #------------------------------------------------------------
@@ -138,6 +164,9 @@ def main():
         # create our child canvas
         if imgui.button("run"):
             iggraph.run()
+        imgui.same_line()
+        if imgui.button("run one step"):
+            iggraph.run_one_step()
         # imgui.same_line(imgui.get_window_width() - 100)
         imgui.push_style_var(imgui.STYLE_FRAME_PADDING, imgui.Vec2(1, 1))
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, imgui.Vec2(0, 0))
@@ -183,33 +212,43 @@ def main():
             #display node box
             draw_list.channels_set_current(0) # background
             imgui.set_cursor_screen_position(node_rect_min)
-            imgui.button("", node.size.x, node.size.y) # TODO invisible_button
+            imgui.invisible_button("", node.size.x, node.size.y)
             if imgui.is_item_hovered():
                 node_hovered_in_scene = node.id
-                # open_context_menu |= ImGui::IsMouseClicked(1)
+            else:
+                node_hovered_in_scene = None
             node_moving_active = imgui.is_item_active()
-            draw_list.add_rect_filled(node_rect_min.x, node_rect_min.y, node_rect_max.x, node_rect_max.y, imgui.get_color_u32_rgba(1,0,0,0.5), 5)
+            #color of the box
+            node_color = node_color_not_run;
+            if iggraph.is_run(node):
+                if node_hovered_in_scene:
+                    node_color = node_color_run_hovered
+                else:
+                    node_color = node_color_run
+            elif node_hovered_in_scene:
+                node_color = node_color_not_run_hovered
+            draw_list.add_rect_filled(node_rect_min.x, node_rect_min.y, node_rect_max.x, node_rect_max.y, node_color, 5)
 
             for parameter in node.inputs:
                 center = node.get_intput_slot_pos(parameter)
                 center_with_offset = add(offset, center)
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
-                imgui.button("input", io_anchors_width, io_anchors_width) # TODO invisible_button
+                imgui.invisible_button("input", io_anchors_width, io_anchors_width)
                 if imgui.is_item_hovered():
                     if parameter_selected and mouse_just_release:
                         iggraph.links.append(NodeLink(image_load.outputs[0],image_filter.inputs[0]))
                         # todo forbid 2 node links
-                draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, imgui.get_color_u32_rgba(0,1,0,1))
+                draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
 
             for parameter in node.outputs:
                 center = node.get_output_slot_pos(parameter)
                 center_with_offset = add(offset, center)
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
-                if (imgui.button("output", io_anchors_width, io_anchors_width)): # TODO invisible_button
+                if (imgui.invisible_button("output", io_anchors_width, io_anchors_width)):
                     if parameter.image:
                         image_texture, image_width, image_height = set_texture(parameter.image, image_texture)
                 creating_link_active = imgui.is_item_active()
-                draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, imgui.get_color_u32_rgba(0,1,1,1))
+                draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
                 if creating_link_active:
                     parameter_selected = parameter
 

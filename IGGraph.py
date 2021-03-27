@@ -50,3 +50,6 @@ class IGGraph:
             node.process()
             self.run_nodes.append(node)
         return True
+
+    def is_run(self, node):
+        return node in self.run_nodes
