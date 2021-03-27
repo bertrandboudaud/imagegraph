@@ -5,6 +5,7 @@ class IGGraph:
         self.nodes = []
         self.links = []
         self.run_nodes = []
+        self.error_nodes = {}
     
     def find_input_parameter_links(self, input_parameter):
         # find output parameters linked to this input parameter
@@ -37,6 +38,7 @@ class IGGraph:
 
     def run(self):
         self.run_nodes = []
+        self.error_nodes = {}
         while True:
             if not self.run_one_step():
                 break
@@ -47,9 +49,15 @@ class IGGraph:
             return False
         for node in node_to_run:
             self.set_inputs(node)
-            node.process()
+            try:
+                node.process()
+            except Exception as e:
+                self.error_nodes[node] = str(e)
             self.run_nodes.append(node)
         return True
 
     def is_run(self, node):
         return node in self.run_nodes
+
+    def is_error(self, node):
+        return node in self.error_nodes

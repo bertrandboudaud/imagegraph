@@ -74,6 +74,22 @@ def get_parameter_color(parameter):
         # unknown
         return imgui.get_color_u32_rgba(1,1,1,0.2)
 
+def get_node_color(node, iggraph, hovered):
+    node_color = imgui.get_color_u32_rgba(0,0.5,1,0.5)
+    if iggraph.is_error(node):
+        if hovered:
+            node_color = imgui.get_color_u32_rgba(1,0,0,0.7)
+        else:
+            node_color = imgui.get_color_u32_rgba(1,0,0,0.5)
+    elif iggraph.is_run(node):
+        if hovered:
+            node_color = imgui.get_color_u32_rgba(0,1,0,0.7)
+        else:
+            node_color = imgui.get_color_u32_rgba(0,1,0,0.5)
+    elif hovered:
+        node_color = imgui.get_color_u32_rgba(0,0.5,1,0.7)
+    return node_color
+
 def main():
 
 
@@ -111,18 +127,11 @@ def main():
     # image_texture, image_width, image_height = load_image("c:\\tmp\\Capture.PNG")
     image_texture = init_texture()
 
-    # colors -------------------------
-    node_color_not_run = imgui.get_color_u32_rgba(1,0,0,0.5)
-    node_color_not_run_hovered = imgui.get_color_u32_rgba(1,0,0,0.7)
-    node_color_run = imgui.get_color_u32_rgba(0,1,0,0.5)
-    node_color_run_hovered = imgui.get_color_u32_rgba(0,1,0,0.7)
-
     while not glfw.window_should_close(window):
         glfw.poll_events()
         impl.process_inputs()
 
         imgui.new_frame()
-
 
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):
@@ -218,17 +227,13 @@ def main():
             else:
                 node_hovered_in_scene = None
             node_moving_active = imgui.is_item_active()
-            #color of the box
-            node_color = node_color_not_run;
-            if iggraph.is_run(node):
-                if node_hovered_in_scene:
-                    node_color = node_color_run_hovered
-                else:
-                    node_color = node_color_run
-            elif node_hovered_in_scene:
-                node_color = node_color_not_run_hovered
-            draw_list.add_rect_filled(node_rect_min.x, node_rect_min.y, node_rect_max.x, node_rect_max.y, node_color, 5)
+            draw_list.add_rect_filled(node_rect_min.x, node_rect_min.y, node_rect_max.x, node_rect_max.y, get_node_color(node, iggraph, node_hovered_in_scene), 5)
+            if node_hovered_in_scene and iggraph.is_error(node):
+                imgui.begin_tooltip()
+                imgui.text(iggraph.error_nodes[node])
+                imgui.end_tooltip()
 
+            # input parameters
             for parameter in node.inputs:
                 center = node.get_intput_slot_pos(parameter)
                 center_with_offset = add(offset, center)
@@ -240,6 +245,7 @@ def main():
                         # todo forbid 2 node links
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
 
+            # output parameters
             for parameter in node.outputs:
                 center = node.get_output_slot_pos(parameter)
                 center_with_offset = add(offset, center)
