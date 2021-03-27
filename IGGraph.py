@@ -4,6 +4,7 @@ class IGGraph:
     def __init__(self):
         self.nodes = []
         self.links = []
+        self.run_nodes = []
     
     def find_input_parameter_links(self, input_parameter):
         # find output parameters linked to this input parameter
@@ -13,15 +14,19 @@ class IGGraph:
                 found_parameter.append(link.output_parameter)
         return found_parameter
 
-    def find_starting_nodes(self):
+    def find_nodes_to_run(self):
         found_nodes = []
         for node in self.nodes:
-            nb_linked_input = 0
+            linked_outputs = [] # outputs linked to all inputs of the node
             for parameter in node.inputs:
-                linked = self.find_input_parameter_links(parameter)
-                nb_linked_input = nb_linked_input + len(linked)
-            if nb_linked_input == 0:
-                found_nodes.append(node)
+                linked_outputs = linked_outputs + self.find_input_parameter_links(parameter)
+            add_node = not node in self.run_nodes
+            for output in linked_outputs:
+                if not output.owner in self.run_nodes:
+                    add_node = False
+                    break
+            if add_node:
+               found_nodes.append(node) 
         return found_nodes
 
     def run(self):
@@ -31,10 +36,8 @@ class IGGraph:
                 break
         
     def run_one_step(self):
-        node_to_run = []
-        if len(self.run_nodes) == 0:
-            node_to_run = self.find_starting_nodes()
-        else:
+        node_to_run = self.find_nodes_to_run()
+        if len(node_to_run) == 0:
             return False
         for node in node_to_run:
             node.process()
