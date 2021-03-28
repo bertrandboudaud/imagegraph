@@ -144,6 +144,13 @@ def main():
 
 
         #------------------------------------------------------------
+        imgui.begin("Library", True)
+        for node_name in iggraph.node_library.nodes:
+            if imgui.button(node_name):
+                iggraph.create_node(node_name)
+        imgui.end()
+
+        #------------------------------------------------------------
         imgui.begin("Output preview", True)
         if image_texture is not None and image_width>0 and image_height>0:
             # imgui.image(image_texture, image_width, image_height)

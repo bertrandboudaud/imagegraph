@@ -57,28 +57,3 @@ class IGCreateImage(IGNode):
         size = (128, 128)
         color = (73, 109, 137)
         self.created_image.image = Image.new(mode, size, color)
-
-class IGLoadImage(IGNode):
-    def __init__(self):
-        super().__init__("Load Image", imgui.Vec2(50,50))
-        self.add_output_parameter("loaded image", IGParameterImage()) 
-    
-    def process(self):
-        self.url = "c:\\tmp\\Capture.PNG"
-        self.outputs["loaded image"].image = Image.open(self.url).transpose( Image.FLIP_TOP_BOTTOM );
-
-class IGFilterImage(IGNode):
-    def __init__(self):
-        super().__init__("Filter Image", imgui.Vec2(200,100))
-        self.add_input_parameter("source image", IGParameterImage()) 
-        self.add_output_parameter("filtered image", IGParameterImage()) 
-
-    def process(self):
-        if self.inputs["source image"].image.mode == 'RGBA':
-            r,g,b,a = self.inputs["source image"].image.split()
-            rgb_image = Image.merge('RGB', (r,g,b))
-            inverted_image = ImageOps.invert(rgb_image)
-            r2,g2,b2 = inverted_image.split()
-            final_transparent_image = Image.merge('RGBA', (r2,g2,b2,a))
-            self.outputs["filtered image"].image = final_transparent_image
-        
