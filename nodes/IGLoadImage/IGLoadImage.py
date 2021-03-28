@@ -6,9 +6,10 @@ from PIL import ImageOps
 class IGLoadImage(IGNode):
     def __init__(self):
         super().__init__("Load Image", imgui.Vec2(50,50))
+        self.add_input_parameter("url", IGParameterURL()) 
         self.add_output_parameter("loaded image", IGParameterImage()) 
     
     def process(self):
-        self.url = "c:\\tmp\\Capture.PNG"
-        self.outputs["loaded image"].image = Image.open(self.url).transpose( Image.FLIP_TOP_BOTTOM );
+        url = self.inputs["url"].url
+        self.outputs["loaded image"].image = Image.open(url).transpose( Image.FLIP_TOP_BOTTOM );
 

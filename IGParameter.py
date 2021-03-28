@@ -23,9 +23,13 @@ class IGParameterColor(IGParameter):
     def __init__(self):
         super().__init__("Color")
         self.r = 1.0
-        self.g = 0.0
-        self.b = 0.0
+        self.g = 1.0
+        self.b = 1.0
         self.a = 1.0
 
     def color256(self):
         return [self.r*255 , self.g*255, self.b*255, self.a*255]
+class IGParameterURL(IGParameter):
+    def __init__(self):
+        super().__init__("URL")
+        self.url = "c:\\tmp\Capture.PNG"
