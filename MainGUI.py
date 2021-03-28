@@ -112,7 +112,6 @@ def main():
     image_height = 0
     image_texture = None
 
-    mouse_just_release = False  # workaround for creating the link
     # states -------------------------
 
     imgui.create_context()
@@ -244,7 +243,7 @@ def main():
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
                 imgui.invisible_button("input", io_anchors_width, io_anchors_width)
                 if imgui.is_item_hovered():
-                    if parameter_selected and mouse_just_release:
+                    if parameter_selected:
                         iggraph.links.append(NodeLink(parameter_selected, parameter))
                         # todo forbid 2 node links
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
@@ -263,14 +262,6 @@ def main():
                 if creating_link_active:
                     parameter_selected = parameter
 
-            if parameter_selected and imgui.is_mouse_dragging(0, 0.0):
-                draw_link_param_to_point(draw_list, offset, parameter_selected, io.mouse_pos.x, io.mouse_pos.y)
-            elif parameter_selected and not imgui.is_mouse_dragging(0, 0.0) and not mouse_just_release:
-                mouse_just_release = True
-            else:
-                mouse_just_release = False
-                parameter_selected = False
-
             if node_widgets_active or node_moving_active:
                 node_selected = node.id
             if (node_moving_active and imgui.is_mouse_dragging(0, 0.0) and node.id==node_selected):
@@ -278,6 +269,11 @@ def main():
 
             imgui.pop_id()
         draw_list.channels_merge()
+
+        if parameter_selected and imgui.is_mouse_dragging(0, 0.0):
+            draw_link_param_to_point(draw_list, offset, parameter_selected, io.mouse_pos.x, io.mouse_pos.y)
+        elif parameter_selected and not imgui.is_mouse_dragging(0, 0.0):
+            parameter_selected = False
 
         imgui.pop_item_width()
         imgui.end_child()
