@@ -5,6 +5,7 @@ from tkinter import filedialog
 import imgui
 from imgui.integrations.glfw import GlfwRenderer
 from PIL import Image
+from PIL import ImageOps
 import numpy
 from IGNode import *
 from IGGraph import *
@@ -36,10 +37,15 @@ def load_image(image_name):
     return texture, width, height
 
 def set_texture(image, texture):
-    textureData = numpy.array(list(image.getdata()), numpy.uint8)
+    max_width = 256
+    max_height = 256
 
-    width = image.width
-    height = image.height
+    # maybe for later ... resized_image = ImageOps.fit(image, (max_width, max_height))
+    resized_image = image
+    textureData = numpy.array(list(resized_image.getdata()), numpy.uint8)
+
+    width = resized_image.width
+    height = resized_image.height
 
     gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
     gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)

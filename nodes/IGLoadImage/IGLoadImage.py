@@ -11,5 +11,5 @@ class IGLoadImage(IGNode):
     
     def process(self):
         url = self.inputs["url"].url
-        self.outputs["loaded image"].image = Image.open(url).transpose( Image.FLIP_TOP_BOTTOM );
+        self.outputs["loaded image"].image = Image.open(url).convert("RGBA");
 
