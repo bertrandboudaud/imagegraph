@@ -71,6 +71,8 @@ def get_parameter_color(parameter):
         return imgui.get_color_u32_rgba(1,0,0,0.7)
     if (parameter.type == "Rectangle"):
         return imgui.get_color_u32_rgba(0,1,0,0.7)
+    if (parameter.type == "Color"):
+        return imgui.get_color_u32_rgba(1,1,0,0.7)
     else:
         # unknown
         return imgui.get_color_u32_rgba(1,1,1,0.2)
@@ -173,6 +175,12 @@ def main():
                 imgui.text("Top: " + str(selected_parameter.top))
                 imgui.text("Right: " + str(selected_parameter.right))
                 imgui.text("Bottom: " + str(selected_parameter.bottom))
+            elif selected_parameter.type == "Color":
+                color = imgui.color_edit4(selected_parameter.id, selected_parameter.r, selected_parameter.g, selected_parameter.b, selected_parameter.a)
+                selected_parameter.r = color[1][0]
+                selected_parameter.g = color[1][1]
+                selected_parameter.b = color[1][2]
+                selected_parameter.a = color[1][3]
         imgui.end()
 
         #------------------------------------------------------------

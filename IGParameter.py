@@ -18,3 +18,14 @@ class IGParameterRectangle(IGParameter):
         self.left = 10
         self.right = 100
         self.bottom = 100
+
+class IGParameterColor(IGParameter):
+    def __init__(self):
+        super().__init__("Color")
+        self.r = 1.0
+        self.g = 0.0
+        self.b = 0.0
+        self.a = 1.0
+
+    def color256(self):
+        return [self.r*255 , self.g*255, self.b*255, self.a*255]
