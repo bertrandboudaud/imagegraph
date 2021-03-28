@@ -34,7 +34,6 @@ def load_image(image_name):
 
     return texture, width, height
 
-
 def set_texture(image, texture):
     textureData = numpy.array(list(image.getdata()), numpy.uint8)
 
@@ -92,19 +91,16 @@ def get_node_color(node, iggraph, hovered):
 
 def main():
 
-
     # states -------------------------
     
     scrolling = imgui.Vec2(0, 0)
 
     iggraph = IGGraph()
-    image_load = IGLoadImage(3)
-    image_filter = IGFilterImage(4)
-    iggraph.nodes.append(image_load)
-    iggraph.nodes.append(image_filter)
-
-#    iggraph.links.append(NodeLink(image_create.outputs[0],image_filter.inputs[0]))
-#    iggraph.links.append(NodeLink(1,0,2,1))
+    iggraph.create_node("Load Image")
+#    image_load = IGLoadImage(3)
+#    image_filter = IGFilterImage(4)
+#    iggraph.nodes.append(image_load)
+#    iggraph.nodes.append(image_filter)
 
     node_hovered_in_scene = -1
     node_selected = -1

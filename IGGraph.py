@@ -1,4 +1,5 @@
 import imgui # TODO remove this dependency
+from IGLibrary import *
 
 class IGGraph:
     def __init__(self):
@@ -6,6 +7,8 @@ class IGGraph:
         self.links = []
         self.run_nodes = []
         self.error_nodes = {}
+        self.id_generator = 0
+        self.node_library = IGLibrary()
     
     def find_input_parameter_links(self, input_parameter):
         # find output parameters linked to this input parameter
@@ -63,3 +66,9 @@ class IGGraph:
 
     def is_error(self, node):
         return node in self.error_nodes
+    
+    def create_node(self, node_name):
+        new_node = self.node_library.create_node(node_name)
+        new_node.id = self.id_generator
+        self.id_generator = self.id_generator +1
+        self.nodes.append(new_node)

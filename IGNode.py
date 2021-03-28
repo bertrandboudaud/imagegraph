@@ -9,14 +9,17 @@ class NodeLink:
         self.output_parameter = output_parameter
 
 class IGNode:
-    def __init__(self, id, name, pos):
-        self.id = id
+    def __init__(self, name, pos):
+        self.id = None
         self.name = name
         self.pos = pos
         self.size = imgui.Vec2(0,0)
         self.inputs = {}
         self.outputs = {}
-
+    
+    def set_id(self, id):
+        self.id = None
+    
     def get_intput_slot_pos(self, parameter):
         slot_no = 0
         for input_parameter in self.inputs: # replace with map and name of the parameter
@@ -56,8 +59,8 @@ class IGCreateImage(IGNode):
         self.created_image.image = Image.new(mode, size, color)
 
 class IGLoadImage(IGNode):
-    def __init__(self, id):
-        super().__init__(id, "Load Image", imgui.Vec2(50,50))
+    def __init__(self):
+        super().__init__("Load Image", imgui.Vec2(50,50))
         self.add_output_parameter("loaded image", IGParameterImage()) 
     
     def process(self):
@@ -65,8 +68,8 @@ class IGLoadImage(IGNode):
         self.outputs["loaded image"].image = Image.open(self.url).transpose( Image.FLIP_TOP_BOTTOM );
 
 class IGFilterImage(IGNode):
-    def __init__(self, id):
-        super().__init__(id, "Filter Image", imgui.Vec2(200,100))
+    def __init__(self):
+        super().__init__("Filter Image", imgui.Vec2(200,100))
         self.add_input_parameter("source image", IGParameterImage()) 
         self.add_output_parameter("filtered image", IGParameterImage()) 
 
