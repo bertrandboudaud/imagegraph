@@ -61,22 +61,17 @@ def init_textures():
         image_to_textures.append(image_to_texture)
 
 def set_texture(image, texture):
-    max_width = 256
-    max_height = 256
-
-    # maybe for later ... resized_image = ImageOps.fit(image, (max_width, max_height))
-    resized_image = image
+    size = 256, 256
+    resized_image = image.copy()
+    resized_image.thumbnail(size, Image.ANTIALIAS)
     textureData = numpy.array(list(resized_image.getdata()), numpy.uint8)
-
     width = resized_image.width
     height = resized_image.height
-
     gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
     gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
     gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
     gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA,
                     gl.GL_UNSIGNED_BYTE, textureData)
-
     return width, height
 
 # draw link between 2 params
