@@ -1,6 +1,5 @@
 from IGParameter import *
 from IGNode import *
-from PIL import ImageFilter
 from PIL import ImageOps
 
 class IGInvertColors(IGNode):
