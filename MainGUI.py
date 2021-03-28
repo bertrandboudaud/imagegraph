@@ -69,6 +69,8 @@ def draw_link(draw_list, p1_x, p1_y, p2_x, p2_y, parameter):
 def get_parameter_color(parameter):
     if (parameter.type == "Image"):
         return imgui.get_color_u32_rgba(1,0,0,0.7)
+    if (parameter.type == "Rectangle"):
+        return imgui.get_color_u32_rgba(0,1,0,0.7)
     else:
         # unknown
         return imgui.get_color_u32_rgba(1,1,1,0.2)
@@ -97,14 +99,11 @@ def main():
 
     iggraph = IGGraph()
     iggraph.create_node("Load Image")
-#    image_load = IGLoadImage(3)
-#    image_filter = IGFilterImage(4)
-#    iggraph.nodes.append(image_load)
-#    iggraph.nodes.append(image_filter)
 
     node_hovered_in_scene = -1
     node_selected = -1
-    parameter_selected = None
+    parameter_link_start = None
+    selected_parameter = None
 
     io_anchors_width = 10
     
@@ -150,21 +149,30 @@ def main():
         imgui.end()
 
         #------------------------------------------------------------
-        imgui.begin("Output preview", True)
-        if image_texture is not None and image_width>0 and image_height>0:
-            # imgui.image(image_texture, image_width, image_height)
-            window_width = imgui.get_window_width()
-            display_width = 0
-            display_height = 0
-            if image_width >= image_height:
-                display_width = window_width
-                display_height = image_height / (image_width/float(display_width))
-            else:
-                display_height = window_width
-                display_width = image_width / (image_height/float(display_height))
-            imgui.image(image_texture, display_width, display_height)
-            imgui.text("width: " + str(image_width))
-            imgui.text("height: " + str(image_height))
+        imgui.begin("Parameter View", True)
+        if selected_parameter is None:
+            imgui.text("No selected parameter")
+        else:
+            if selected_parameter.type == "Image":
+                if image_texture is not None and image_width>0 and image_height>0:
+                    # imgui.image(image_texture, image_width, image_height)
+                    window_width = imgui.get_window_width()
+                    display_width = 0
+                    display_height = 0
+                    if image_width >= image_height:
+                        display_width = window_width
+                        display_height = image_height / (image_width/float(display_width))
+                    else:
+                        display_height = window_width
+                        display_width = image_width / (image_height/float(display_height))
+                    imgui.image(image_texture, display_width, display_height)
+                    imgui.text("width: " + str(image_width))
+                    imgui.text("height: " + str(image_height))
+            elif selected_parameter.type == "Rectangle":
+                imgui.text("Left: " + str(selected_parameter.left))
+                imgui.text("Top: " + str(selected_parameter.top))
+                imgui.text("Right: " + str(selected_parameter.right))
+                imgui.text("Bottom: " + str(selected_parameter.bottom))
         imgui.end()
 
         #------------------------------------------------------------
@@ -241,11 +249,14 @@ def main():
                 center = node.get_intput_slot_pos(parameter)
                 center_with_offset = add(offset, center)
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
-                imgui.invisible_button("input", io_anchors_width, io_anchors_width)
+                imgui.push_id(str(str(node.id) + "input" + parameter.id))
+                if (imgui.invisible_button("input", io_anchors_width, io_anchors_width)):
+                    selected_parameter = parameter
                 if imgui.is_item_hovered():
-                    if parameter_selected:
-                        iggraph.links.append(NodeLink(parameter_selected, parameter))
+                    if parameter_link_start:
+                        iggraph.links.append(NodeLink(parameter_link_start, parameter))
                         # todo forbid 2 node links
+                imgui.pop_id()
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
 
             # output parameters
@@ -257,10 +268,11 @@ def main():
                 if (imgui.invisible_button("output", io_anchors_width, io_anchors_width)):
                     if parameter.image:
                         image_texture, image_width, image_height = set_texture(parameter.image, image_texture)
+                    selected_parameter = parameter
                 creating_link_active = imgui.is_item_active()
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
                 if creating_link_active:
-                    parameter_selected = parameter
+                    parameter_link_start = parameter
 
             if node_widgets_active or node_moving_active:
                 node_selected = node.id
@@ -270,10 +282,10 @@ def main():
             imgui.pop_id()
         draw_list.channels_merge()
 
-        if parameter_selected and imgui.is_mouse_dragging(0, 0.0):
-            draw_link_param_to_point(draw_list, offset, parameter_selected, io.mouse_pos.x, io.mouse_pos.y)
-        elif parameter_selected and not imgui.is_mouse_dragging(0, 0.0):
-            parameter_selected = False
+        if parameter_link_start and imgui.is_mouse_dragging(0, 0.0):
+            draw_link_param_to_point(draw_list, offset, parameter_link_start, io.mouse_pos.x, io.mouse_pos.y)
+        elif parameter_link_start and not imgui.is_mouse_dragging(0, 0.0):
+            parameter_link_start = False
 
         imgui.pop_item_width()
         imgui.end_child()
