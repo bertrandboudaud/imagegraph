@@ -12,29 +12,53 @@ from IGGraph import *
 
 NODE_WINDOW_PADDING = imgui.Vec2(8.0, 8.0)
 
+class ImageToTexture:
+    def __init__(self):
+        self.image = None
+        self.timestamp = 0
+        self.gl_texture = 0
+        self.gl_widh =0
+        self.gl_height = 0
+        self.last_used = 0
+
+image_to_texture_last_used = 0
+image_to_textures = []
+
 def add(vect1, vect2):
     res = imgui.Vec2(vect1.x + vect2.x, vect1.y + vect2.y)
     return res
 
-def init_texture():
-    image_texture = gl.glGenTextures(1)
-    return image_texture
+def get_gl_texture(image, timestamp):
+    global image_to_texture_last_used
+    image_to_texture_last_used = image_to_texture_last_used + 1
+    for image_to_texture in image_to_textures:
+        if image_to_texture.image == image and image_to_texture.timestamp == timestamp:
+            image_to_texture.last_used = image_to_texture_last_used
+            return image_to_texture
+        if image_to_texture.image == image and image_to_texture.timestamp != timestamp:
+            width, height = set_texture(image_to_texture.image, image_to_texture.gl_texture)
+            image_to_texture.gl_widh = width
+            image_to_texture.gl_height = height
+            image_to_texture.last_used = image_to_texture_last_used
+            image_to_texture.timestamp = timestamp
+            return image_to_texture
+    minimum_last_used = image_to_textures[0]
+    for image_to_texture in image_to_textures:
+        if image_to_texture.last_used < minimum_last_used.last_used:
+            minimum_last_used = image_to_texture
+    width, height = set_texture(image, minimum_last_used.gl_texture)
+    minimum_last_used.image = image
+    minimum_last_used.gl_widh = width
+    minimum_last_used.gl_height = height
+    minimum_last_used.last_used = image_to_texture_last_used
+    minimum_last_used.timestamp = timestamp
+    return minimum_last_used
 
-def load_image(image_name):
-    image = Image.open(image_name).transpose( Image.FLIP_TOP_BOTTOM );
-    textureData = numpy.array(list(image.getdata()), numpy.uint8)
-
-    width = image.width
-    height = image.height
-
-    texture = gl.glGenTextures(1)
-    gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
-    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
-    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
-    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA,
-                    gl.GL_UNSIGNED_BYTE, textureData)
-
-    return texture, width, height
+def init_textures():
+    for i in range(16):
+        image_to_texture = ImageToTexture()
+        image_to_texture.gl_texture = gl.glGenTextures(1)
+        image_to_textures.append(image_to_texture)
 
 def set_texture(image, texture):
     max_width = 256
@@ -53,7 +77,7 @@ def set_texture(image, texture):
     gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0, gl.GL_RGBA,
                     gl.GL_UNSIGNED_BYTE, textureData)
 
-    return texture, width, height
+    return width, height
 
 # draw link between 2 params
 def draw_link_param_to_param(draw_list, offset, output_parameter, input_parameter):
@@ -102,6 +126,52 @@ def get_node_color(node, iggraph, hovered):
         node_color = imgui.get_color_u32_rgba(0,0.5,1,0.7)
     return node_color
 
+def display_parameter(parameter):
+    if imgui.tree_node(parameter.id):
+        if parameter.type == "Image":
+            if parameter.image:
+                image_to_texture = get_gl_texture(parameter.image, parameter.timestamp)
+                # imgui.image(image_texture, image_width, image_height)
+                window_width = 256 # imgui.get_window_width()
+                display_width = 0
+                display_height = 0
+                image_width = image_to_texture.gl_widh
+                image_height = image_to_texture.gl_height
+                if image_width >= image_height:
+                    display_width = window_width
+                    display_height = image_height / (image_width/float(display_width))
+                else:
+                    display_height = window_width
+                    display_width = image_width / (image_height/float(display_height))
+                imgui.image(image_to_texture.gl_texture, display_width, display_height)
+                imgui.text("width: " + str(image_width))
+                imgui.text("height: " + str(image_height))
+            else:
+                imgui.text("No image available - run workflow or connect an image source")
+        elif parameter.type == "Rectangle":
+            imgui.text("Left: " + str(parameter.left))
+            imgui.text("Top: " + str(parameter.top))
+            imgui.text("Right: " + str(parameter.right))
+            imgui.text("Bottom: " + str(parameter.bottom))
+        elif parameter.type == "Color":
+            changed, color = imgui.color_edit4(parameter.id, parameter.r, parameter.g, parameter.b, parameter.a)
+            if changed:
+                parameter.r = color[0]
+                parameter.g = color[1]
+                parameter.b = color[2]
+                parameter.a = color[3]
+        elif parameter.type == "URL":
+            changed, textval = imgui.input_text(parameter.id, parameter.url, 1024)
+            if changed:
+                parameter.url = textval
+            if imgui.button("browse..."):
+                root = tk.Tk()
+                root.withdraw()
+                file_path = filedialog.askopenfilename()
+                if file_path:
+                    parameter.url = file_path
+        imgui.tree_pop()
+
 def main():
 
     # states -------------------------
@@ -112,7 +182,7 @@ def main():
     iggraph.create_node("Load Image")
 
     node_hovered_in_scene = -1
-    node_selected = -1
+    node_selected = None
     parameter_link_start = None
     selected_parameter = None
 
@@ -129,8 +199,7 @@ def main():
     impl = GlfwRenderer(window)
     io = imgui.get_io()
 
-    # image_texture, image_width, image_height = load_image("c:\\tmp\\Capture.PNG")
-    image_texture = init_texture()
+    init_textures()
 
     while not glfw.window_should_close(window):
         glfw.poll_events()
@@ -160,47 +229,18 @@ def main():
         imgui.end()
 
         #------------------------------------------------------------
-        imgui.begin("Parameter View", True)
-        if selected_parameter is None:
-            imgui.text("No selected parameter")
-        else:
-            if selected_parameter.type == "Image":
-                if image_texture is not None and image_width>0 and image_height>0:
-                    # imgui.image(image_texture, image_width, image_height)
-                    window_width = imgui.get_window_width()
-                    display_width = 0
-                    display_height = 0
-                    if image_width >= image_height:
-                        display_width = window_width
-                        display_height = image_height / (image_width/float(display_width))
-                    else:
-                        display_height = window_width
-                        display_width = image_width / (image_height/float(display_height))
-                    imgui.image(image_texture, display_width, display_height)
-                    imgui.text("width: " + str(image_width))
-                    imgui.text("height: " + str(image_height))
-            elif selected_parameter.type == "Rectangle":
-                imgui.text("Left: " + str(selected_parameter.left))
-                imgui.text("Top: " + str(selected_parameter.top))
-                imgui.text("Right: " + str(selected_parameter.right))
-                imgui.text("Bottom: " + str(selected_parameter.bottom))
-            elif selected_parameter.type == "Color":
-                changed, color = imgui.color_edit4(selected_parameter.id, selected_parameter.r, selected_parameter.g, selected_parameter.b, selected_parameter.a)
-                if changed:
-                    selected_parameter.r = color[0]
-                    selected_parameter.g = color[1]
-                    selected_parameter.b = color[2]
-                    selected_parameter.a = color[3]
-            elif selected_parameter.type == "URL":
-                changed, textval = imgui.input_text(selected_parameter.id, selected_parameter.url, 1024)
-                if changed:
-                    selected_parameter.url = textval
-                if imgui.button("browse..."):
-                    root = tk.Tk()
-                    root.withdraw()
-                    file_path = filedialog.askopenfilename()
-                    if file_path:
-                        selected_parameter.url = file_path
+        imgui.begin("Node View", True)
+        if node_selected:
+            if imgui.tree_node("Inputs"):
+                for parameter_name in node_selected.inputs:
+                    parameter = node_selected.inputs[parameter_name]
+                    display_parameter(parameter)
+                imgui.tree_pop()
+            if imgui.tree_node("Output"):
+                for parameter_name in node_selected.outputs:
+                    parameter = node_selected.outputs[parameter_name]
+                    display_parameter(parameter)
+                imgui.tree_pop()
 
         imgui.end()
 
@@ -295,8 +335,6 @@ def main():
                 center_with_offset = add(offset, center)
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
                 if (imgui.invisible_button("output", io_anchors_width, io_anchors_width)):
-                    if parameter.image:
-                        image_texture, image_width, image_height = set_texture(parameter.image, image_texture)
                     selected_parameter = parameter
                 creating_link_active = imgui.is_item_active()
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
@@ -304,8 +342,8 @@ def main():
                     parameter_link_start = parameter
 
             if node_widgets_active or node_moving_active:
-                node_selected = node.id
-            if (node_moving_active and imgui.is_mouse_dragging(0, 0.0) and node.id==node_selected):
+                node_selected = node
+            if (node_moving_active and imgui.is_mouse_dragging(0, 0.0) and node.id==node_selected.id):
                node.pos = add(node.pos, io.mouse_delta)
 
             imgui.pop_id()

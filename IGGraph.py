@@ -9,6 +9,7 @@ class IGGraph:
         self.error_nodes = {}
         self.id_generator = 0
         self.node_library = IGLibrary()
+        self.timestamp = 1
     
     def find_input_parameter_links(self, input_parameter):
         # find output parameters linked to this input parameter
@@ -59,6 +60,7 @@ class IGGraph:
             except Exception as e:
                 self.error_nodes[node] = str(e)
             self.run_nodes.append(node)
+            self.update_timestamps(node)
         return True
 
     def is_run(self, node):
@@ -72,3 +74,12 @@ class IGGraph:
         new_node.id = self.id_generator
         self.id_generator = self.id_generator +1
         self.nodes.append(new_node)
+
+    def update_timestamps(self, node):
+        for parameter_name in node.inputs:
+            parameter = node.inputs[parameter_name]
+            parameter.timestamp = self.timestamp
+        for parameter_name in node.outputs:
+            parameter = node.outputs[parameter_name]
+            parameter.timestamp = self.timestamp
+        self.timestamp = self.timestamp + 1
