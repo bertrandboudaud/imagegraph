@@ -1,6 +1,7 @@
 import glfw
 import OpenGL.GL as gl
-
+import tkinter as tk
+from tkinter import filedialog
 import imgui
 from imgui.integrations.glfw import GlfwRenderer
 from PIL import Image
@@ -188,6 +189,13 @@ def main():
                 changed, textval = imgui.input_text(selected_parameter.id, selected_parameter.url, 1024)
                 if changed:
                     selected_parameter.url = textval
+                if imgui.button("browse..."):
+                    root = tk.Tk()
+                    root.withdraw()
+                    file_path = filedialog.askopenfilename()
+                    if file_path:
+                        selected_parameter.url = file_path
+
         imgui.end()
 
         #------------------------------------------------------------
