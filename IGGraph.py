@@ -7,7 +7,7 @@ class IGGraph:
         self.links = []
         self.run_nodes = []
         self.error_nodes = {}
-        self.id_generator = 0
+        self.id_generator = 1
         self.node_library = IGLibrary()
         self.timestamp = 1
     

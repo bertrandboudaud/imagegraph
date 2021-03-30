@@ -99,6 +99,8 @@ def get_parameter_color(parameter):
         return imgui.get_color_u32_rgba(0,1,0,0.7)
     if (parameter.type == "Color"):
         return imgui.get_color_u32_rgba(1,1,0,0.7)
+    if (parameter.type == "Integer"):
+        return imgui.get_color_u32_rgba(1,1,1,0.7)
     if (parameter.type == "URL"):
         return imgui.get_color_u32_rgba(0,1,1,0.7)
     else:
@@ -144,10 +146,22 @@ def display_parameter(parameter):
             else:
                 imgui.text("No image available - run workflow or connect an image source")
         elif parameter.type == "Rectangle":
-            imgui.text("Left: " + str(parameter.left))
-            imgui.text("Top: " + str(parameter.top))
-            imgui.text("Right: " + str(parameter.right))
-            imgui.text("Bottom: " + str(parameter.bottom))
+            changed, value = imgui.input_float("Left", parameter.left)
+            if changed:
+                parameter.left = value
+            changed, value = imgui.input_float("Top", parameter.top)
+            if changed:
+                parameter.top = value
+            changed, value = imgui.input_float("Right", parameter.right)
+            if changed:
+                parameter.right = value
+            changed, value = imgui.input_float("Bottom", parameter.bottom)
+            if changed:
+                parameter.left = bottom
+        elif parameter.type == "Integer": # to do change to "number"
+            changed, value = imgui.input_int("Value", parameter.value)
+            if changed:
+                parameter.value = bottom
         elif parameter.type == "Color":
             changed, color = imgui.color_edit4(parameter.id, parameter.r, parameter.g, parameter.b, parameter.a)
             if changed:
@@ -174,7 +188,7 @@ def main():
     scrolling = imgui.Vec2(0, 0)
 
     iggraph = IGGraph()
-    iggraph.create_node("Load Image")
+    # iggraph.create_node("Load Image")
 
     node_hovered_in_scene = -1
     node_selected = None
@@ -186,6 +200,7 @@ def main():
     image_width = 0
     image_height = 0
     image_texture = None
+    creating_link_active = False
 
     # states -------------------------
 
@@ -204,14 +219,11 @@ def main():
 
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):
-
                 clicked_quit, selected_quit = imgui.menu_item(
                     "Quit", 'Cmd+Q', False, True
                 )
-
                 if clicked_quit:
                     exit(1)
-
                 imgui.end_menu()
             imgui.end_main_menu_bar()
 
@@ -221,6 +233,19 @@ def main():
         for node_name in iggraph.node_library.nodes:
             if imgui.button(node_name):
                 iggraph.create_node(node_name)
+        imgui.end()
+
+        #------------------------------------------------------------
+        imgui.begin("Debug", True)
+        if parameter_link_start:
+            imgui.text("parameter_link_start: " + parameter_link_start.id)
+        else:
+            imgui.text("parameter_link_start: " + "None")
+        imgui.text("creating_link_active: " + str(creating_link_active))
+        if selected_parameter:
+            imgui.text("selected_parameter: " + selected_parameter.id)
+        else:
+            imgui.text("selected_parameter: " + "None")
         imgui.end()
 
         #------------------------------------------------------------
@@ -236,12 +261,10 @@ def main():
                     parameter = node_selected.outputs[parameter_name]
                     display_parameter(parameter)
                 imgui.tree_pop()
-
         imgui.end()
 
         #------------------------------------------------------------
         imgui.begin("Example: Custom Node Graph", True)
-        #imgui.begin_group()
         NODE_SLOT_RADIUS = 4.0
 
         # create our child canvas
@@ -259,9 +282,6 @@ def main():
         imgui.push_item_width(120.0)
 
         offset = add(imgui.get_cursor_screen_pos(), scrolling)
-        #print(scrolling)
-        #print(imgui.get_cursor_screen_pos())
-        #print(offset)
         draw_list = imgui.get_window_draw_list()
 
         # Display links
@@ -295,7 +315,7 @@ def main():
             #display node box
             draw_list.channels_set_current(0) # background
             imgui.set_cursor_screen_position(node_rect_min)
-            imgui.invisible_button("", node.size.x, node.size.y)
+            imgui.invisible_button(str(node.id), node.size.x, node.size.y)
             if imgui.is_item_hovered():
                 node_hovered_in_scene = node.id
             else:

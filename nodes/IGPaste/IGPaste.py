@@ -16,5 +16,5 @@ class IGPaste(IGNode):
         coords = self.inputs["coordinates"].to_tuple()
         width = coords[2] - coords[0]
         height = coords[3] - coords[1]
-        source.paste(to_past.resize((width, height)), (coords[0], coords[1]))
+        source.paste(to_past.resize((int(width), int(height))), (int(coords[0]), int(coords[1])))
         self.outputs["composed image"].image = source;

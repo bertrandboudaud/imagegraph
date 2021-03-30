@@ -37,3 +37,11 @@ class IGParameterURL(IGParameter):
     def __init__(self):
         super().__init__("URL")
         self.url = "c:\\tmp\Capture.PNG"
+class IGParameterInteger(IGParameter):
+    def __init__(self):
+        super().__init__("Integer")
+        self.value = 0
+class IGParameterList(IGParameter):
+    def __init__(self):
+        super().__init__("List")
+        self.list = []
