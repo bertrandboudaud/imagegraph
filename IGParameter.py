@@ -20,6 +20,9 @@ class IGParameterRectangle(IGParameter):
         self.right = 100
         self.bottom = 100
 
+    def to_tuple(self):
+        return (self.top, self.left, self.right, self.bottom)
+
 class IGParameterColor(IGParameter):
     def __init__(self):
         super().__init__("Color")

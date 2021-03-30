@@ -347,7 +347,7 @@ def main():
         if parameter_link_start and imgui.is_mouse_dragging(0, 0.0):
             draw_link_param_to_point(draw_list, offset, parameter_link_start, io.mouse_pos.x, io.mouse_pos.y)
         elif parameter_link_start and not imgui.is_mouse_dragging(0, 0.0):
-            parameter_link_start = False
+            parameter_link_start = None
 
         imgui.pop_item_width()
         imgui.end_child()

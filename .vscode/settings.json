@@ -1,4 +1,5 @@
 {
     "python.pythonPath": "C:\\Users\\bertr\\AppData\\Local\\Programs\\Python\\Python38-32\\python.exe",
-    "C_Cpp.default.compilerPath": "c:\\Users\\bertr\\.vscode\\extensions\\bartmanabyss.amiga-debug-1.0.0\\bin\\opt\\bin\\m68k-amiga-elf-gcc.exe"
+    "C_Cpp.default.compilerPath": "c:\\Users\\bertr\\.vscode\\extensions\\bartmanabyss.amiga-debug-1.0.0\\bin\\opt\\bin\\m68k-amiga-elf-gcc.exe",
+    "restructuredtext.confPath": ""
 }
