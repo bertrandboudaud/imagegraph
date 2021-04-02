@@ -4,7 +4,7 @@ from PIL import ImageOps
 
 class IGPaste(IGNode):
     def __init__(self):
-        super().__init__("Paste image on another", imgui.Vec2(200,100))
+        super().__init__("Draw Image")
         self.add_input_parameter("source image", IGParameterImage()) 
         self.add_input_parameter("image to past", IGParameterImage())
         self.add_input_parameter("coordinates", IGParameterRectangle()) 
@@ -17,4 +17,5 @@ class IGPaste(IGNode):
         width = coords[2] - coords[0]
         height = coords[3] - coords[1]
         source.paste(to_past.resize((int(width), int(height))), (int(coords[0]), int(coords[1])))
-        self.outputs["composed image"].image = source;
+        self.outputs["composed image"].image = source
+        self.set_all_outputs_ready()

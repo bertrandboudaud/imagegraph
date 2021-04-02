@@ -69,11 +69,13 @@ class IGGraph:
     def is_error(self, node):
         return node in self.error_nodes
     
-    def create_node(self, node_name):
+    def create_node(self, node_name, pos = imgui.Vec2(0,0)):
         new_node = self.node_library.create_node(node_name)
         new_node.id = self.id_generator
+        new_node.pos = pos
         self.id_generator = self.id_generator +1
         self.nodes.append(new_node)
+        return new_node
 
     def update_timestamps(self, node):
         for parameter_name in node.inputs:

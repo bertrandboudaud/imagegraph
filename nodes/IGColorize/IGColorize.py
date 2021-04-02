@@ -4,7 +4,7 @@ from PIL import ImageOps
 
 class IGColorize(IGNode):
     def __init__(self):
-        super().__init__("Colorize image", imgui.Vec2(200,100))
+        super().__init__("Colorize image")
         self.add_input_parameter("source image", IGParameterImage()) 
         self.add_input_parameter("black", IGParameterColor()) 
         self.add_input_parameter("white", IGParameterColor()) 
@@ -17,4 +17,5 @@ class IGColorize(IGNode):
         image = image.convert("L")
         # mid is also available
         self.outputs["colorized image"].image = ImageOps.colorize(image, black, white).convert("RGBA")
+        self.set_all_outputs_ready()
         

@@ -4,7 +4,7 @@ from PIL import ImageOps
 
 class IGGrid(IGNode):
     def __init__(self):
-        super().__init__("Grid Rectangles", imgui.Vec2(200,100))
+        super().__init__("Grid Rectangles")
         self.add_input_parameter("source image", IGParameterImage()) 
         self.add_input_parameter("number of horizontal cells", IGParameterInteger())
         self.add_input_parameter("number of vertical cells", IGParameterInteger())
@@ -26,3 +26,4 @@ class IGGrid(IGNode):
                 new_rectangle.right = new_rectangle.left + cell_width
                 new_rectangle.bottom = new_rectangle.top + cell_height
                 self.outputs["composed image"].list.append(IGParameterRectangle())
+        self.set_all_outputs_ready()

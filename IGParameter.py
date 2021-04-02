@@ -7,6 +7,7 @@ class IGParameter:
         self.type = type
         self.owner = None
         self.timestamp = 0
+        self.is_ready = False
     
 class IGParameterImage(IGParameter):
     def __init__(self):

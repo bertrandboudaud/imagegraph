@@ -4,7 +4,7 @@ from PIL import ImageOps
 
 class IGInvertColors(IGNode):
     def __init__(self):
-        super().__init__("Invert colors", imgui.Vec2(200,100))
+        super().__init__("Invert colors")
         self.add_input_parameter("source image", IGParameterImage()) 
         self.add_output_parameter("filtered image", IGParameterImage()) 
 
@@ -16,4 +16,5 @@ class IGInvertColors(IGNode):
             r2,g2,b2 = inverted_image.split()
             final_transparent_image = Image.merge('RGBA', (r2,g2,b2,a))
             self.outputs["filtered image"].image = final_transparent_image
+            self.set_all_outputs_ready()
         

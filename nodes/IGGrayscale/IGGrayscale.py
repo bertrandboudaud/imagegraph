@@ -4,10 +4,11 @@ from PIL import ImageOps
 
 class IGGrayscale(IGNode):
     def __init__(self):
-        super().__init__("Gray Scale", imgui.Vec2(200,100))
+        super().__init__("Gray Scale")
         self.add_input_parameter("source image", IGParameterImage()) 
         self.add_output_parameter("grayscale image", IGParameterImage()) 
 
     def process(self):
         self.outputs["grayscale image"].image = ImageOps.grayscale(self.inputs["source image"].image).convert('RGBA')
+        self.set_all_outputs_ready()
         

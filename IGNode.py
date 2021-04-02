@@ -9,20 +9,24 @@ class NodeLink:
         self.output_parameter = output_parameter
 
 class IGNode:
-    def __init__(self, name, pos):
+    def __init__(self, name, pos = imgui.Vec2(0,0)):
         self.id = None
         self.name = name
         self.pos = pos
         self.size = imgui.Vec2(0,0)
         self.inputs = {}
         self.outputs = {}
+
+    def set_all_outputs_ready(self):
+        for output_parameter_name in self.outputs:
+            self.outputs[output_parameter_name].is_ready = True
     
     def set_id(self, id):
         self.id = None
     
     def get_intput_slot_pos(self, parameter):
         slot_no = 0
-        for input_parameter in self.inputs: # replace with map and name of the parameter
+        for input_parameter in self.inputs:
             if input_parameter == parameter.id:
                 break
             slot_no = slot_no + 1 
@@ -30,7 +34,7 @@ class IGNode:
 
     def get_output_slot_pos(self, parameter):
         slot_no = 0
-        for output_parameter in self.outputs: # replace with map and name of the parameter
+        for output_parameter in self.outputs:
             if output_parameter == parameter.id:
                 break
             slot_no = slot_no + 1 
@@ -48,7 +52,7 @@ class IGNode:
 
 class IGCreateImage(IGNode):
     def __init__(self, id):
-        super().__init__(id, "Create Image", imgui.Vec2(50,50))
+        super().__init__(id, "Create Image")
         self.created_image = IGParameterImage("created image", self) 
         self.outputs.append(self.created_image)
     

@@ -157,11 +157,11 @@ def display_parameter(parameter):
                 parameter.right = value
             changed, value = imgui.input_float("Bottom", parameter.bottom)
             if changed:
-                parameter.left = bottom
+                parameter.left = value
         elif parameter.type == "Integer": # to do change to "number"
             changed, value = imgui.input_int("Value", parameter.value)
             if changed:
-                parameter.value = bottom
+                parameter.value = value
         elif parameter.type == "Color":
             changed, color = imgui.color_edit4(parameter.id, parameter.r, parameter.g, parameter.b, parameter.a)
             if changed:
@@ -188,7 +188,14 @@ def main():
     scrolling = imgui.Vec2(0, 0)
 
     iggraph = IGGraph()
-    # iggraph.create_node("Load Image")
+
+    node_load_image = iggraph.create_node("Load Image", imgui.Vec2(200,100))
+    node_grid = iggraph.create_node("Grid Rectangles", imgui.Vec2(400,100))
+    node_for_each = iggraph.create_node("For Each Loop", imgui.Vec2(600,100))
+    node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(800,300))
+    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_grid.inputs["source image"]))
+    iggraph.links.append(NodeLink(node_grid.outputs["cells"], node_for_each.inputs["List to iterate"]))
+    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_for_each.inputs["Input1"]))
 
     node_hovered_in_scene = -1
     node_selected = None
