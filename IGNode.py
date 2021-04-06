@@ -19,7 +19,7 @@ class IGNode:
 
     def set_all_outputs_ready(self):
         for output_parameter_name in self.outputs:
-            self.outputs[output_parameter_name].is_ready = True
+            self.outputs[output_parameter_name].set_ready()
     
     def set_id(self, id):
         self.id = None

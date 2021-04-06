@@ -17,7 +17,7 @@ class ImageToTexture:
         self.image = None
         self.timestamp = 0
         self.gl_texture = 0
-        self.gl_widh =0
+        self.gl_widh = 0
         self.gl_height = 0
         self.last_used = 0
 
@@ -190,12 +190,18 @@ def main():
     iggraph = IGGraph()
 
     node_load_image = iggraph.create_node("Load Image", imgui.Vec2(200,100))
-    node_grid = iggraph.create_node("Grid Rectangles", imgui.Vec2(400,100))
+    node_grid = iggraph.create_node("Grid Rectangles", imgui.Vec2(400,50))
     node_for_each = iggraph.create_node("For Each Loop", imgui.Vec2(600,100))
-    node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(800,300))
+    node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(600,300))
+    node_grid.inputs["number of horizontal cells"].value = 20
+    node_grid.inputs["number of vertical cells"].value = 10
     iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_grid.inputs["source image"]))
     iggraph.links.append(NodeLink(node_grid.outputs["cells"], node_for_each.inputs["List to iterate"]))
     iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_for_each.inputs["Input1"]))
+    iggraph.links.append(NodeLink(node_for_each.outputs["Element"], node_draw_image.inputs["coordinates"]))
+    iggraph.links.append(NodeLink(node_for_each.outputs["Output1"], node_draw_image.inputs["source image"]))
+    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_draw_image.inputs["image to past"]))
+    iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
 
     node_hovered_in_scene = -1
     node_selected = None

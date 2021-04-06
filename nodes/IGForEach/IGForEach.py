@@ -20,11 +20,11 @@ class IGForEach(IGNode):
         list_parameter = self.inputs["List to iterate"]
         if (self.index < len(list_parameter.list)):
             current_element = list_parameter.list[self.index]
-            self.output["Element"] = current_element
-            self.output["Element"].is_ready = True
-            self.output["Output1"] = self.inputs["Input1"]
-            self.output["Output1"].is_ready = True
+            self.outputs["Element"].set_value(current_element)
+            self.outputs["Element"].set_ready()
+            self.outputs["Output1"].set_value(self.inputs["Input1"])
+            self.outputs["Output1"].set_ready()
         else:
-            self.output["Result1"] = self.inputs["Input1"]
-            self.output["Result1"].is_ready = True
+            self.outputs["Result1"].set_value(self.inputs["Input1"])
+            self.outputs["Result1"].set_ready()
         self.index = self.index + 1

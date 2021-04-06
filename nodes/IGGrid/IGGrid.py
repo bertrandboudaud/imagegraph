@@ -25,5 +25,5 @@ class IGGrid(IGNode):
                 new_rectangle.top = y * cell_height
                 new_rectangle.right = new_rectangle.left + cell_width
                 new_rectangle.bottom = new_rectangle.top + cell_height
-                self.outputs["composed image"].list.append(IGParameterRectangle())
+                self.outputs["cells"].list.append(new_rectangle)
         self.set_all_outputs_ready()
