@@ -12,6 +12,9 @@ from IGNode import *
 from IGGraph import *
 
 NODE_WINDOW_PADDING = imgui.Vec2(8.0, 8.0)
+previous_key_callback = None
+selected_link = None
+iggraph = None
 
 class ImageToTexture:
     def __init__(self):
@@ -84,10 +87,10 @@ def draw_link_param_to_param(draw_list, offset, output_parameter, input_paramete
     draw_link(draw_list, p1.x, p1.y, p2.x, p2.y, output_parameter, hovered)
 
 # draw link between 1 param, 1 point
-def draw_link_param_to_point(draw_list, offset, parameter, p2_x, p2_y):
+def draw_link_param_to_point(draw_list, offset, parameter, p2_x, p2_y, hovered):
     node_out = parameter.owner
     p1 = add(offset, node_out.get_output_slot_pos(parameter))
-    draw_link(draw_list, p1.x, p1.y, p2_x, p2_y, parameter)
+    draw_link(draw_list, p1.x, p1.y, p2_x, p2_y, parameter, hovered)
 
 # draw link between 2 points
 def draw_link(draw_list, p1_x, p1_y, p2_x, p2_y, parameter, hovered):
@@ -185,8 +188,20 @@ def display_parameter(parameter):
                     parameter.url = file_path
         imgui.tree_pop()
 
-def main():
+def key_event(window,key,scancode,action,mods):
+    global iggraph
+    key_consumed = False;
+    if action == glfw.PRESS and key == glfw.KEY_DELETE:
+        if selected_link:
+            iggraph.links.remove(selected_link)
+            key_consumed = True
+    if not key_consumed:
+        previous_key_callback(window,key,scancode,action,mods)
 
+def main():
+    global previous_key_callback
+    global selected_link
+    global iggraph
     # states -------------------------
     
     scrolling = imgui.Vec2(0, 0)
@@ -218,7 +233,6 @@ def main():
     image_height = 0
     image_texture = None
     creating_link_active = False
-    selected_link = None
 
     # states -------------------------
 
@@ -226,6 +240,7 @@ def main():
     window = impl_glfw_init()
     impl = GlfwRenderer(window)
     io = imgui.get_io()
+    previous_key_callback = glfw.set_key_callback(window,key_event)
 
     init_textures()
 
@@ -391,7 +406,7 @@ def main():
         draw_list.channels_merge()
 
         if parameter_link_start and imgui.is_mouse_dragging(0):
-            draw_link_param_to_point(draw_list, offset, parameter_link_start, io.mouse_pos.x, io.mouse_pos.y)
+            draw_link_param_to_point(draw_list, offset, parameter_link_start, io.mouse_pos.x, io.mouse_pos.y, True)
         elif parameter_link_start and not imgui.is_mouse_dragging(0):
             parameter_link_start = None
 
