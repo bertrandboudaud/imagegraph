@@ -3,6 +3,7 @@ import OpenGL.GL as gl
 import tkinter as tk
 from tkinter import filedialog
 import imgui
+import math 
 from imgui.integrations.glfw import GlfwRenderer
 from PIL import Image
 from PIL import ImageOps
@@ -75,12 +76,12 @@ def set_texture(image, texture):
     return width, height
 
 # draw link between 2 params
-def draw_link_param_to_param(draw_list, offset, output_parameter, input_parameter):
+def draw_link_param_to_param(draw_list, offset, output_parameter, input_parameter, hovered):
     node_inp = input_parameter.owner
     node_out = output_parameter.owner
     p1 = add(offset, node_inp.get_intput_slot_pos(input_parameter))
     p2 = add(offset, node_out.get_output_slot_pos(output_parameter))
-    draw_link(draw_list, p1.x, p1.y, p2.x, p2.y, output_parameter)
+    draw_link(draw_list, p1.x, p1.y, p2.x, p2.y, output_parameter, hovered)
 
 # draw link between 1 param, 1 point
 def draw_link_param_to_point(draw_list, offset, parameter, p2_x, p2_y):
@@ -89,8 +90,11 @@ def draw_link_param_to_point(draw_list, offset, parameter, p2_x, p2_y):
     draw_link(draw_list, p1.x, p1.y, p2_x, p2_y, parameter)
 
 # draw link between 2 points
-def draw_link(draw_list, p1_x, p1_y, p2_x, p2_y, parameter):
-    draw_list.add_line(p1_x, p1_y, p2_x, p2_y,  get_parameter_color(parameter), 3)
+def draw_link(draw_list, p1_x, p1_y, p2_x, p2_y, parameter, hovered):
+    thickness = 2
+    if hovered:
+        thickness = 3
+    draw_list.add_line(p1_x, p1_y, p2_x, p2_y,  get_parameter_color(parameter), thickness)
 
 def get_parameter_color(parameter):
     if (parameter.type == "Image"):
@@ -191,17 +195,17 @@ def main():
 
     node_load_image = iggraph.create_node("Load Image", imgui.Vec2(200,100))
     node_grid = iggraph.create_node("Grid Rectangles", imgui.Vec2(400,50))
-    node_for_each = iggraph.create_node("For Each Loop", imgui.Vec2(600,100))
-    node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(600,300))
-    node_grid.inputs["number of horizontal cells"].value = 20
-    node_grid.inputs["number of vertical cells"].value = 10
+    #node_for_each = iggraph.create_node("For Each Loop", imgui.Vec2(600,100))
+    #node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(600,300))
+    #node_grid.inputs["number of horizontal cells"].value = 20
+    #node_grid.inputs["number of vertical cells"].value = 10
     iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_grid.inputs["source image"]))
-    iggraph.links.append(NodeLink(node_grid.outputs["cells"], node_for_each.inputs["List to iterate"]))
-    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_for_each.inputs["Input1"]))
-    iggraph.links.append(NodeLink(node_for_each.outputs["Element"], node_draw_image.inputs["coordinates"]))
-    iggraph.links.append(NodeLink(node_for_each.outputs["Output1"], node_draw_image.inputs["source image"]))
-    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_draw_image.inputs["image to past"]))
-    iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
+    #iggraph.links.append(NodeLink(node_grid.outputs["cells"], node_for_each.inputs["List to iterate"]))
+    #iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_for_each.inputs["Input1"]))
+    #iggraph.links.append(NodeLink(node_for_each.outputs["Element"], node_draw_image.inputs["coordinates"]))
+    #iggraph.links.append(NodeLink(node_for_each.outputs["Output1"], node_draw_image.inputs["source image"]))
+    #iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_draw_image.inputs["image to past"]))
+    #iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
 
     node_hovered_in_scene = -1
     node_selected = None
@@ -214,6 +218,7 @@ def main():
     image_height = 0
     image_texture = None
     creating_link_active = False
+    selected_link = None
 
     # states -------------------------
 
@@ -301,7 +306,7 @@ def main():
         draw_list.channels_split(2)
         draw_list.channels_set_current(0)
         for link in iggraph.links:
-            draw_link_param_to_param(draw_list, offset, link.output_parameter, link.input_parameter)
+            draw_link_param_to_param(draw_list, offset, link.output_parameter, link.input_parameter, selected_link == link)
 
         # Display nodes
         for node in iggraph.nodes:
@@ -353,6 +358,10 @@ def main():
                     if parameter_link_start:
                         iggraph.links.append(NodeLink(parameter_link_start, parameter))
                         # todo forbid 2 node links
+                    else:
+                        imgui.begin_tooltip()
+                        imgui.text(parameter_name)
+                        imgui.end_tooltip()
                 imgui.pop_id()
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
 
@@ -364,6 +373,10 @@ def main():
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
                 if (imgui.invisible_button("output", io_anchors_width, io_anchors_width)):
                     selected_parameter = parameter
+                if imgui.is_item_hovered():
+                    imgui.begin_tooltip()
+                    imgui.text(parameter_name)
+                    imgui.end_tooltip()
                 creating_link_active = imgui.is_item_active()
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
                 if creating_link_active:
@@ -371,19 +384,36 @@ def main():
 
             if node_widgets_active or node_moving_active:
                 node_selected = node
-            if (node_moving_active and imgui.is_mouse_dragging(0, 0.0) and node.id==node_selected.id):
+            if (node_moving_active and imgui.is_mouse_dragging(0) and node.id==node_selected.id):
                node.pos = add(node.pos, io.mouse_delta)
 
             imgui.pop_id()
         draw_list.channels_merge()
 
-        if parameter_link_start and imgui.is_mouse_dragging(0, 0.0):
+        if parameter_link_start and imgui.is_mouse_dragging(0):
             draw_link_param_to_point(draw_list, offset, parameter_link_start, io.mouse_pos.x, io.mouse_pos.y)
-        elif parameter_link_start and not imgui.is_mouse_dragging(0, 0.0):
+        elif parameter_link_start and not imgui.is_mouse_dragging(0):
             parameter_link_start = None
 
         imgui.pop_item_width()
         imgui.end_child()
+
+        # mouse click on the scene
+        if imgui.is_mouse_clicked(0):
+            mouse_pos = imgui.get_mouse_pos()
+            local_mouse_pos = imgui.Vec2(mouse_pos.x - offset.x, mouse_pos.y - offset.y)
+            selected_link = None
+            for link in iggraph.links:
+                start_node = link.output_parameter.owner
+                start_pos = start_node.get_output_slot_pos(link.output_parameter)
+                end_node = link.input_parameter.owner
+                end_pos = end_node.get_intput_slot_pos(link.input_parameter)
+                distance_mouse_start = math.sqrt(((local_mouse_pos.x-start_pos.x)**2) + ((local_mouse_pos.y-start_pos.y)**2))
+                distance_mouse_end = math.sqrt(((local_mouse_pos.x-end_pos.x)**2) + ((local_mouse_pos.y-end_pos.y)**2))
+                distance_start_end = math.sqrt(((start_pos.x-end_pos.x)**2) + ((start_pos.y-end_pos.y)**2))
+                if ((distance_mouse_start + distance_mouse_end) - distance_start_end) < 0.1:
+                    selected_link = link
+                
         # to remove at the end
         imgui.end()
 
