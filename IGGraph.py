@@ -74,7 +74,7 @@ class IGGraph:
                 node.process()
             except Exception as e:
                 self.error_nodes[node] = str(e)
-                raise(e)
+                # raise(e)
             self.run_nodes.append(node)
             self.update_timestamps(node)
         return True

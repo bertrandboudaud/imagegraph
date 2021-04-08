@@ -68,6 +68,20 @@ class IGParameterInteger(IGParameter):
     
     def set_value(self, other_parameter):
         self.value = other_parameter.value
+
+class IGParameterCoords(IGParameter):
+    def __init__(self):
+        super().__init__("Coordinates")
+        self.x = 0
+        self.y = 0
+
+    def set_value(self, other_parameter):
+        self.x = other_parameter.x
+        self.y = other_parameter.y
+
+    def to_tuple(self):
+        return (self.x, self.y)
+
 class IGParameterList(IGParameter):
     def __init__(self):
         super().__init__("List")

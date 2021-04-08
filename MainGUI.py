@@ -105,6 +105,8 @@ def get_parameter_color(parameter):
         return imgui.get_color_u32_rgba(1,0,0,0.7)
     if (parameter.type == "Rectangle"):
         return imgui.get_color_u32_rgba(0,1,0,0.7)
+    if (parameter.type == "Coordinates"):
+        return imgui.get_color_u32_rgba(0.625,0.32,0.17,0.7)
     if (parameter.type == "Color"):
         return imgui.get_color_u32_rgba(1,1,0,0.7)
     if (parameter.type == "Integer"):
@@ -166,6 +168,13 @@ def display_parameter(parameter):
             changed, value = imgui.input_float("Bottom", parameter.bottom)
             if changed:
                 parameter.left = value
+        elif parameter.type == "Coordinates":
+            changed, value = imgui.input_float("x", parameter.x)
+            if changed:
+                parameter.x = value
+            changed, value = imgui.input_float("y", parameter.y)
+            if changed:
+                parameter.y = value
         elif parameter.type == "Integer": # to do change to "number"
             changed, value = imgui.input_int("Value", parameter.value)
             if changed:
