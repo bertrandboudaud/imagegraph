@@ -4,7 +4,7 @@ from PIL import ImageOps
 
 class IGColorize(IGNode):
     def __init__(self):
-        super().__init__("Colorize image")
+        super().__init__("Colorize Image")
         self.add_input_parameter("source image", IGParameterImage()) 
         self.add_input_parameter("black", IGParameterColor()) 
         self.add_input_parameter("white", IGParameterColor()) 

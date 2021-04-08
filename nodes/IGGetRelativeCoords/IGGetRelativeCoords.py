@@ -19,6 +19,6 @@ class IGGetRelativeCoords(IGNode):
         bottom = self.inputs["rectangle"].bottom
         relative_coord_x = self.inputs["relative coords"].x
         relative_coord_y = self.inputs["relative coords"].y
-        self.outputs["coords"].x = ((right-left)*relative_coord_x) + right
-        self.outputs["coords"].y = ((top-bottom)*relative_coord_y) + top
+        self.outputs["coords"].x = ((right-left)*relative_coord_x) + left
+        self.outputs["coords"].y = ((bottom-top)*relative_coord_y) + top
         self.set_all_outputs_ready()
