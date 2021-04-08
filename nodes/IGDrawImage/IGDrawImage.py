@@ -2,7 +2,7 @@ from IGParameter import *
 from IGNode import *
 from PIL import ImageOps
 
-class IGPaste(IGNode):
+class IGDrawImage(IGNode):
     def __init__(self):
         super().__init__("Draw Image")
         self.add_input_parameter("source image", IGParameterImage()) 
