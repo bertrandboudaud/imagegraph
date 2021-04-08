@@ -16,6 +16,7 @@ previous_key_callback = None
 selected_link = None
 selected_node = None
 iggraph = None
+debug_is_mouse_dragging = False
 
 class ImageToTexture:
     def __init__(self):
@@ -220,6 +221,7 @@ def main():
     global selected_link
     global selected_node
     global iggraph
+    global debug_is_mouse_dragging
     # states -------------------------
     
     scrolling = imgui.Vec2(0, 0)
@@ -294,6 +296,7 @@ def main():
             imgui.text("selected_parameter: " + selected_parameter.id)
         else:
             imgui.text("selected_parameter: " + "None")
+        imgui.text("is_mouse_dragging: " + str(debug_is_mouse_dragging))
         imgui.end()
 
         #------------------------------------------------------------
@@ -386,6 +389,7 @@ def main():
                 if (imgui.invisible_button("input", io_anchors_width, io_anchors_width)):
                     selected_parameter = parameter
                 if imgui.is_item_hovered():
+                    print("is_item_hovered")
                     if parameter_link_start:
                         iggraph.links.append(NodeLink(parameter_link_start, parameter))
                     else:
@@ -421,10 +425,12 @@ def main():
             imgui.pop_id()
         draw_list.channels_merge()
 
+        debug_is_mouse_dragging = imgui.is_mouse_dragging(0)
         if parameter_link_start and imgui.is_mouse_dragging(0):
             draw_link_param_to_point(draw_list, offset, parameter_link_start, io.mouse_pos.x, io.mouse_pos.y, True)
         elif parameter_link_start and not imgui.is_mouse_dragging(0):
             parameter_link_start = None
+            print("parameter_link_start -> None")
 
         imgui.pop_item_width()
         imgui.end_child()
