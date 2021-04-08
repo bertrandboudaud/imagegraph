@@ -93,6 +93,16 @@ class IGGraph:
         self.nodes.append(new_node)
         return new_node
 
+    def remove_node(self, node):
+        # first remove links
+        links_to_remove = []
+        for link in self.links:
+            if (link.input_parameter.owner == node) or (link.output_parameter.owner == node):
+                links_to_remove.append(link)
+        for link in links_to_remove:
+            self.links.remove(link)
+        self.nodes.remove(node)
+
     def update_timestamps(self, node):
         #for parameter_name in node.inputs:
         #    parameter = node.inputs[parameter_name]

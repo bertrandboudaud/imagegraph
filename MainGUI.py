@@ -14,6 +14,7 @@ from IGGraph import *
 NODE_WINDOW_PADDING = imgui.Vec2(8.0, 8.0)
 previous_key_callback = None
 selected_link = None
+selected_node = None
 iggraph = None
 
 class ImageToTexture:
@@ -190,10 +191,17 @@ def display_parameter(parameter):
 
 def key_event(window,key,scancode,action,mods):
     global iggraph
+    global selected_link
+    global selected_node
     key_consumed = False;
     if action == glfw.PRESS and key == glfw.KEY_DELETE:
         if selected_link:
             iggraph.links.remove(selected_link)
+            selected_link = None
+            key_consumed = True
+        elif selected_node:
+            iggraph.remove_node(selected_node)
+            selected_node = None
             key_consumed = True
     if not key_consumed:
         previous_key_callback(window,key,scancode,action,mods)
@@ -201,6 +209,7 @@ def key_event(window,key,scancode,action,mods):
 def main():
     global previous_key_callback
     global selected_link
+    global selected_node
     global iggraph
     # states -------------------------
     
@@ -210,20 +219,19 @@ def main():
 
     node_load_image = iggraph.create_node("Load Image", imgui.Vec2(200,100))
     node_grid = iggraph.create_node("Grid Rectangles", imgui.Vec2(400,50))
-    #node_for_each = iggraph.create_node("For Each Loop", imgui.Vec2(600,100))
-    #node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(600,300))
-    #node_grid.inputs["number of horizontal cells"].value = 20
-    #node_grid.inputs["number of vertical cells"].value = 10
+    node_for_each = iggraph.create_node("For Each Loop", imgui.Vec2(600,100))
+    node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(600,300))
+    node_grid.inputs["number of horizontal cells"].value = 20
+    node_grid.inputs["number of vertical cells"].value = 10
     iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_grid.inputs["source image"]))
-    #iggraph.links.append(NodeLink(node_grid.outputs["cells"], node_for_each.inputs["List to iterate"]))
-    #iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_for_each.inputs["Input1"]))
-    #iggraph.links.append(NodeLink(node_for_each.outputs["Element"], node_draw_image.inputs["coordinates"]))
-    #iggraph.links.append(NodeLink(node_for_each.outputs["Output1"], node_draw_image.inputs["source image"]))
-    #iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_draw_image.inputs["image to past"]))
-    #iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
+    iggraph.links.append(NodeLink(node_grid.outputs["cells"], node_for_each.inputs["List to iterate"]))
+    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_for_each.inputs["Input1"]))
+    iggraph.links.append(NodeLink(node_for_each.outputs["Element"], node_draw_image.inputs["coordinates"]))
+    iggraph.links.append(NodeLink(node_for_each.outputs["Output1"], node_draw_image.inputs["source image"]))
+    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_draw_image.inputs["image to past"]))
+    iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
 
     node_hovered_in_scene = -1
-    node_selected = None
     parameter_link_start = None
     selected_parameter = None
 
@@ -232,7 +240,6 @@ def main():
     image_width = 0
     image_height = 0
     image_texture = None
-    creating_link_active = False
 
     # states -------------------------
 
@@ -274,7 +281,6 @@ def main():
             imgui.text("parameter_link_start: " + parameter_link_start.id)
         else:
             imgui.text("parameter_link_start: " + "None")
-        imgui.text("creating_link_active: " + str(creating_link_active))
         if selected_parameter:
             imgui.text("selected_parameter: " + selected_parameter.id)
         else:
@@ -283,15 +289,15 @@ def main():
 
         #------------------------------------------------------------
         imgui.begin("Node View", True)
-        if node_selected:
+        if selected_node:
             if imgui.tree_node("Inputs"):
-                for parameter_name in node_selected.inputs:
-                    parameter = node_selected.inputs[parameter_name]
+                for parameter_name in selected_node.inputs:
+                    parameter = selected_node.inputs[parameter_name]
                     display_parameter(parameter)
                 imgui.tree_pop()
             if imgui.tree_node("Output"):
-                for parameter_name in node_selected.outputs:
-                    parameter = node_selected.outputs[parameter_name]
+                for parameter_name in selected_node.outputs:
+                    parameter = selected_node.outputs[parameter_name]
                     display_parameter(parameter)
                 imgui.tree_pop()
         imgui.end()
@@ -354,7 +360,8 @@ def main():
             else:
                 node_hovered_in_scene = None
             node_moving_active = imgui.is_item_active()
-            draw_list.add_rect_filled(node_rect_min.x, node_rect_min.y, node_rect_max.x, node_rect_max.y, get_node_color(node, iggraph, node_hovered_in_scene), 5)
+            use_hovered_color = node_hovered_in_scene or selected_node == node
+            draw_list.add_rect_filled(node_rect_min.x, node_rect_min.y, node_rect_max.x, node_rect_max.y, get_node_color(node, iggraph, use_hovered_color), 5)
             if node_hovered_in_scene and iggraph.is_error(node):
                 imgui.begin_tooltip()
                 imgui.text(iggraph.error_nodes[node])
@@ -372,7 +379,6 @@ def main():
                 if imgui.is_item_hovered():
                     if parameter_link_start:
                         iggraph.links.append(NodeLink(parameter_link_start, parameter))
-                        # todo forbid 2 node links
                     else:
                         imgui.begin_tooltip()
                         imgui.text(parameter_name)
@@ -386,20 +392,21 @@ def main():
                 center = node.get_output_slot_pos(parameter)
                 center_with_offset = add(offset, center)
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
+                imgui.push_id(str(str(node.id) + "output" + parameter.id))
                 if (imgui.invisible_button("output", io_anchors_width, io_anchors_width)):
                     selected_parameter = parameter
                 if imgui.is_item_hovered():
                     imgui.begin_tooltip()
                     imgui.text(parameter_name)
                     imgui.end_tooltip()
-                creating_link_active = imgui.is_item_active()
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
-                if creating_link_active:
+                imgui.pop_id()
+                if imgui.is_item_active():
                     parameter_link_start = parameter
 
             if node_widgets_active or node_moving_active:
-                node_selected = node
-            if (node_moving_active and imgui.is_mouse_dragging(0) and node.id==node_selected.id):
+                selected_node = node
+            if (node_moving_active and imgui.is_mouse_dragging(0) and node.id==selected_node.id):
                node.pos = add(node.pos, io.mouse_delta)
 
             imgui.pop_id()
