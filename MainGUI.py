@@ -216,18 +216,31 @@ def key_event(window,key,scancode,action,mods):
     if not key_consumed:
         previous_key_callback(window,key,scancode,action,mods)
 
+width_library = 200
+width_shematic = 400
+width_context = 200
+height_window = 800
+separator_width = 4
+
 def main():
+    global width_library
+    global width_shematic
+    global width_context
+    global height_window
+
     global previous_key_callback
     global selected_link
     global selected_node
     global iggraph
     global debug_is_mouse_dragging
+
     # states -------------------------
     
     scrolling = imgui.Vec2(0, 0)
 
     iggraph = IGGraph()
 
+    # Example
     node_load_image = iggraph.create_node("Load Image", imgui.Vec2(200,100))
     node_load_image2 = iggraph.create_node("Load Image", imgui.Vec2(200,500))
     node_relative_coord = iggraph.create_node("Relative Coords", imgui.Vec2(400,400))
@@ -284,49 +297,42 @@ def main():
                     "Quit", 'Cmd+Q', False, True
                 )
                 if clicked_quit:
-                    exit(1)
+                    exit(0)
                 imgui.end_menu()
             imgui.end_main_menu_bar()
 
+        imgui.push_style_var(imgui.STYLE_ITEM_SPACING, imgui.Vec2(0,0))
+        imgui.set_next_window_size(io.display_size.x, io.display_size.y - imgui.get_cursor_pos_y())
+        imgui.push_style_var(imgui.STYLE_WINDOW_ROUNDING, 0)
+        imgui.begin("Splitter test", False, imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS)
+        
+        width_shematic = io.display_size.x - separator_width  - width_context - separator_width - width_library
+        height_window = io.display_size.y
 
-        #------------------------------------------------------------
-        imgui.begin("Library", True)
+        # ==============================================================================
+        # Library
+        # ==============================================================================
+
+        imgui.push_style_var(imgui.STYLE_CHILD_BORDERSIZE, 0)
+        imgui.begin_child("Library", width_library, 0, True)
         for node_name in iggraph.node_library.nodes:
             if imgui.button(node_name):
                 iggraph.create_node(node_name)
-        imgui.end()
+        imgui.end_child()
+        imgui.pop_style_var()
 
-        #------------------------------------------------------------
-        imgui.begin("Debug", True)
-        if parameter_link_start:
-            imgui.text("parameter_link_start: " + parameter_link_start.id)
-        else:
-            imgui.text("parameter_link_start: " + "None")
-        if selected_parameter:
-            imgui.text("selected_parameter: " + selected_parameter.id)
-        else:
-            imgui.text("selected_parameter: " + "None")
-        imgui.text("is_mouse_dragging: " + str(debug_is_mouse_dragging))
-        imgui.end()
+        imgui.same_line()
+        imgui.button("vsplitter", separator_width, height_window)
+        if (imgui.is_item_active()):
+            width_library += io.mouse_delta.x
+        
+        imgui.same_line()
 
-        #------------------------------------------------------------
-        imgui.begin("Node View", True)
-        if selected_node:
-            if imgui.tree_node("Inputs"):
-                for parameter_name in selected_node.inputs:
-                    parameter = selected_node.inputs[parameter_name]
-                    display_parameter(parameter)
-                imgui.tree_pop()
-            if imgui.tree_node("Output"):
-                for parameter_name in selected_node.outputs:
-                    parameter = selected_node.outputs[parameter_name]
-                    display_parameter(parameter)
-                imgui.tree_pop()
-        imgui.end()
-
-        #------------------------------------------------------------
-        imgui.begin("Example: Custom Node Graph", True)
-        NODE_SLOT_RADIUS = 4.0
+        # ==============================================================================
+        # Shematic
+        # ==============================================================================
+        imgui.push_style_var(imgui.STYLE_CHILD_BORDERSIZE, 0)
+        imgui.begin_child("shematic", width_shematic, 0, True)
 
         # create our child canvas
         if imgui.button("run"):
@@ -461,7 +467,51 @@ def main():
                 if ((distance_mouse_start + distance_mouse_end) - distance_start_end) < 0.1:
                     selected_link = link
                 
-        # to remove at the end
+        imgui.end_child()
+        imgui.pop_style_var()
+
+        imgui.same_line()
+        imgui.button("hsplitter", separator_width, height_window)
+        if (imgui.is_item_active()):
+            width_context -= io.mouse_delta.x
+        
+        # ==============================================================================
+        # Context
+        # ==============================================================================
+
+        imgui.same_line()
+        imgui.push_style_var(imgui.STYLE_CHILD_BORDERSIZE, 0)
+        imgui.begin_child("child3", width_context, 0, True);
+        if selected_node:
+            if imgui.tree_node("Inputs"):
+                for parameter_name in selected_node.inputs:
+                    parameter = selected_node.inputs[parameter_name]
+                    display_parameter(parameter)
+                imgui.tree_pop()
+            if imgui.tree_node("Output"):
+                for parameter_name in selected_node.outputs:
+                    parameter = selected_node.outputs[parameter_name]
+                    display_parameter(parameter)
+                imgui.tree_pop()
+        imgui.end_child()
+        imgui.pop_style_var()
+
+        # 
+        imgui.end()
+        imgui.pop_style_var()
+        imgui.pop_style_var()
+
+        #------------------------------------------------------------
+        imgui.begin("Debug", True)
+        if parameter_link_start:
+            imgui.text("parameter_link_start: " + parameter_link_start.id)
+        else:
+            imgui.text("parameter_link_start: " + "None")
+        if selected_parameter:
+            imgui.text("selected_parameter: " + selected_parameter.id)
+        else:
+            imgui.text("selected_parameter: " + "None")
+        imgui.text("is_mouse_dragging: " + str(debug_is_mouse_dragging))
         imgui.end()
 
         gl.glClearColor(1., 1., 1., 1)
