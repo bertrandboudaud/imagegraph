@@ -275,6 +275,7 @@ def main():
     image_height = 0
     image_texture = None
 
+
     # states -------------------------
 
     imgui.create_context()
@@ -301,13 +302,16 @@ def main():
                 imgui.end_menu()
             imgui.end_main_menu_bar()
 
+        height_window = io.display_size.y - imgui.get_cursor_pos_y()
+
         imgui.push_style_var(imgui.STYLE_ITEM_SPACING, imgui.Vec2(0,0))
-        imgui.set_next_window_size(io.display_size.x, io.display_size.y - imgui.get_cursor_pos_y())
+        imgui.set_next_window_size(io.display_size.x, height_window)
         imgui.push_style_var(imgui.STYLE_WINDOW_ROUNDING, 0)
         imgui.begin("Splitter test", False, imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS)
-        
+        imgui.pop_style_var()
+        imgui.pop_style_var()
+
         width_shematic = io.display_size.x - separator_width  - width_context - separator_width - width_library
-        height_window = io.display_size.y
 
         # ==============================================================================
         # Library
@@ -322,7 +326,7 @@ def main():
         imgui.pop_style_var()
 
         imgui.same_line()
-        imgui.button("vsplitter", separator_width, height_window)
+        imgui.button("left_splitter", separator_width, height_window - 20)
         if (imgui.is_item_active()):
             width_library += io.mouse_delta.x
         
@@ -471,7 +475,7 @@ def main():
         imgui.pop_style_var()
 
         imgui.same_line()
-        imgui.button("hsplitter", separator_width, height_window)
+        imgui.button("right_splitter", separator_width, height_window - 20)
         if (imgui.is_item_active()):
             width_context -= io.mouse_delta.x
         
@@ -498,8 +502,6 @@ def main():
 
         # 
         imgui.end()
-        imgui.pop_style_var()
-        imgui.pop_style_var()
 
         #------------------------------------------------------------
         imgui.begin("Debug", True)
