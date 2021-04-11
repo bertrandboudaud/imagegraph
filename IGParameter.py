@@ -1,7 +1,6 @@
 import imgui # TODO remove this dependency
 from PIL import Image
 
-# TODO: 'value' should be used for the generic value, to avoid the set_value method
 class IGParameter:
     def __init__(self, type):
         self.id = ""
@@ -9,83 +8,174 @@ class IGParameter:
         self.owner = None
         self.timestamp = 0
         self.is_ready = False
+        self._value = {}
     
     def set_ready(self, ready=True):
         self.is_ready = ready
         self.timestamp = self.timestamp + 1
-    
+
+    def set_value(self, other_parameter):
+        self._value = other_parameter._value.copy()
+
 class IGParameterImage(IGParameter):
     def __init__(self):
         super().__init__("Image")
-        self.image = None
+        self._value["image"] = None
     
-    def set_value(self, other_parameter):
-        self.image = other_parameter.image
+    @property
+    def image(self):
+        return self._value["image"]
+
+    @image.setter
+    def image(self, image):
+        self._value["image"] = image
+
 class IGParameterRectangle(IGParameter):
     def __init__(self):
         super().__init__("Rectangle")
-        self.top = 0
-        self.left = 0
-        self.right = 0
-        self.bottom = 0
+        self._value["left"] = 0
+        self._value["top"] = 0
+        self._value["right"] = 0
+        self._value["bottom"] = 0
 
-    def set_value(self, other_parameter):
-        self.top = other_parameter.top
-        self.left = other_parameter.left
-        self.right = other_parameter.right
-        self.bottom = other_parameter.bottom
+    @property
+    def left(self):
+        return self._value["left"]
 
+    @left.setter
+    def left(self, left):
+        self._value["left"] = left
+        
+    @property
+    def top(self):
+        return self._value["top"]
+
+    @top.setter
+    def top(self, top):
+        self._value["top"] = top
+        
+    @property
+    def right(self):
+        return self._value["right"]
+
+    @right.setter
+    def right(self, right):
+        self._value["right"] = right
+        
+    @property
+    def bottom(self):
+        return self._value["bottom"]
+
+    @bottom.setter
+    def bottom(self, bottom):
+        self._value["bottom"] = bottom
+        
     def to_tuple(self):
-        return (self.left, self.top, self.right, self.bottom)
+        return (self._value["left"], self._value["top"], self._value["right"], self._value["bottom"])
 
 class IGParameterColor(IGParameter):
     def __init__(self):
         super().__init__("Color")
-        self.r = 1.0
-        self.g = 1.0
-        self.b = 1.0
-        self.a = 1.0
+        self._value["r"] = 1.0
+        self._value["g"] = 1.0
+        self._value["b"] = 1.0
+        self._value["a"] = 1.0
 
     def color256(self):
         return [self.r*255 , self.g*255, self.b*255, self.a*255]
 
-    def set_value(self, other_parameter):
-        self.r = other_parameter.r
-        self.g = other_parameter.g
-        self.b = other_parameter.b
-        self.a = other_parameter.a
+    @property
+    def r(self):
+        return self._value["r"]
+
+    @r.setter
+    def r(self, r):
+        self._value["r"] = r
+
+    @property
+    def g(self):
+        return self._value["g"]
+    
+    @g.setter
+    def g(self, g):
+        self._value["g"] = g
+
+    @property
+    def b(self):
+        return self._value["b"]
+
+    @b.setter
+    def b(self, b):
+        self._value["b"] = b
+        
+    @property
+    def a(self):
+        return self._value["a"]
+
+    @a.setter
+    def a(self, a):
+        self._value["a"] = a
 class IGParameterURL(IGParameter):
     def __init__(self):
         super().__init__("URL")
-        self.url = "c:\\tmp\Capture.PNG"
+        self._value["url"] = "c:\\tmp\Capture.PNG"
 
-    def set_value(self, other_parameter):
-        self.url = other_parameter.url
+    @property
+    def url(self):
+        return self._value["url"]
+
+    @url.setter
+    def url(self, url):
+        self._value["url"] = list
+
 class IGParameterInteger(IGParameter):
     def __init__(self):
         super().__init__("Integer")
-        self.value = 0
-    
-    def set_value(self, other_parameter):
-        self.value = other_parameter.value
+        self._value["value"] = 0
+
+    @property
+    def value(self):
+        return self._value["value"]
+
+    @value.setter
+    def value(self, value):
+        self._value["value"] = value
 
 class IGParameterCoords(IGParameter):
     def __init__(self):
         super().__init__("Coordinates")
-        self.x = 0
-        self.y = 0
+        self._value["x"] = 0
+        self._value["y"] = 0
 
-    def set_value(self, other_parameter):
-        self.x = other_parameter.x
-        self.y = other_parameter.y
+    @property
+    def x(self):
+        return self._value["x"]
+
+    @x.setter
+    def x(self, x):
+        self._value["x"] = x
+
+    @property
+    def y(self):
+        return self._value["y"]
+
+    @x.setter
+    def y(self, y):
+        self._value["y"] = y
 
     def to_tuple(self):
-        return (self.x, self.y)
+        return (self._value["x"], self._value["y"])
 
 class IGParameterList(IGParameter):
     def __init__(self):
         super().__init__("List")
-        self.list = []
+        self._value["list"] = []
     
-    def set_value(self, other_parameter):
-        self.list = other_parameter.list
+    @property
+    def list(self):
+        return self._value["list"]
+
+    @list.setter
+    def list(self, list):
+        self._value["list"] = list
+

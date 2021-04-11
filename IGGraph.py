@@ -117,3 +117,10 @@ class IGGraph:
             for output_parameter in linked_outputs:
                 if output_parameter.is_ready:
                     self.parameter_run_timestamp[(output_parameter, node)] = output_parameter.timestamp
+
+    def reset(self):
+        for node in self.nodes:
+            node.reset()
+        self.run_nodes = []
+        self.error_nodes = {}
+        self.parameter_run_timestamp = {}        

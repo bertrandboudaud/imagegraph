@@ -265,6 +265,8 @@ def main():
     iggraph.links.append(NodeLink(node_colorize_image.outputs["colorized image"], node_draw_image.inputs["image to past"]))
     iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
 
+    iggraph.reset()
+
     node_hovered_in_scene = -1
     parameter_link_start = None
     selected_parameter = None
@@ -344,6 +346,9 @@ def main():
         imgui.same_line()
         if imgui.button("run one step"):
             iggraph.run_one_step()
+        imgui.same_line()
+        if imgui.button("reset"):
+            iggraph.reset()
         # imgui.same_line(imgui.get_window_width() - 100)
         imgui.push_style_var(imgui.STYLE_FRAME_PADDING, imgui.Vec2(1, 1))
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, imgui.Vec2(0, 0))

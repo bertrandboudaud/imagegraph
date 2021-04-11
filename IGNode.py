@@ -50,6 +50,9 @@ class IGNode:
         parameter.owner = self
         self.outputs[id] = parameter
 
+    def reset(self):
+        print("reset")
+
 class IGCreateImage(IGNode):
     def __init__(self, id):
         super().__init__(id, "Create Image")
