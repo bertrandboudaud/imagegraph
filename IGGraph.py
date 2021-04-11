@@ -64,17 +64,19 @@ class IGGraph:
         
     def run_one_step(self):
         print("-- run one step")
-        node_to_run = self.find_nodes_to_run()
-        if len(node_to_run) == 0:
+        nodes_to_run = self.find_nodes_to_run()
+        if len(nodes_to_run) == 0:
             return False
-        for node in node_to_run:
+        for node in nodes_to_run:
             print("run " + node.name)
+            if not node in self.run_nodes:
+                node.preapre_to_process()
             self.set_inputs(node)
             try:
                 node.process()
             except Exception as e:
-                self.error_nodes[node] = str(e)
-                # raise(e)
+                self.error_nodes[node] = repr(e)
+                raise(e)
             self.run_nodes.append(node)
             self.update_timestamps(node)
         return True

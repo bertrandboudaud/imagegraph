@@ -44,14 +44,32 @@ class IGNode:
         parameter.id = id
         parameter.owner = self
         self.inputs[id] = parameter
+        self.preapre_to_process()
 
     def add_output_parameter(self, id, parameter):
         parameter.id = id
         parameter.owner = self
         self.outputs[id] = parameter
+        self.preapre_to_process()
+
+    def preapre_to_process(self):
+        # save default values
+        for input_parameter_name in self.inputs:
+            parameter = self.inputs[input_parameter_name]
+            parameter.backup_value()
+        for output_parameter_name in self.outputs:
+            parameter = self.outputs[output_parameter_name]
+            parameter.backup_value()
 
     def reset(self):
-        print("reset")
+        for input_parameter_name in self.inputs:
+            parameter = self.inputs[input_parameter_name]
+            parameter.restore_backup_value()
+            parameter.is_ready = False
+        for output_parameter_name in self.outputs:
+            parameter = self.outputs[output_parameter_name]
+            parameter.restore_backup_value()
+            parameter.is_ready = False
 
 class IGCreateImage(IGNode):
     def __init__(self, id):

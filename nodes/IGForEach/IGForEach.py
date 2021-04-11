@@ -13,7 +13,7 @@ class IGForEach(IGNode):
         self.reset()
     
     def reset(self):
-        # TODO call super reset
+        super().reset()
         self.index = 0
 
     def process(self):

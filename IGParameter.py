@@ -9,6 +9,7 @@ class IGParameter:
         self.timestamp = 0
         self.is_ready = False
         self._value = {}
+        self._backup_value = {}
     
     def set_ready(self, ready=True):
         self.is_ready = ready
@@ -16,6 +17,12 @@ class IGParameter:
 
     def set_value(self, other_parameter):
         self._value = other_parameter._value.copy()
+
+    def backup_value(self):
+        self._backup_value = self._value.copy()
+
+    def restore_backup_value(self):
+        self._value = self._backup_value.copy()
 
 class IGParameterImage(IGParameter):
     def __init__(self):
@@ -126,7 +133,7 @@ class IGParameterURL(IGParameter):
 
     @url.setter
     def url(self, url):
-        self._value["url"] = list
+        self._value["url"] = url
 
 class IGParameterInteger(IGParameter):
     def __init__(self):

@@ -265,7 +265,7 @@ def main():
     iggraph.links.append(NodeLink(node_colorize_image.outputs["colorized image"], node_draw_image.inputs["image to past"]))
     iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
 
-    iggraph.reset()
+    # iggraph.reset()
 
     node_hovered_in_scene = -1
     parameter_link_start = None
