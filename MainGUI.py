@@ -17,6 +17,7 @@ selected_link = None
 selected_node = None
 iggraph = None
 debug_is_mouse_dragging = False
+show_debug_window = False
 
 class ImageToTexture:
     def __init__(self):
@@ -233,6 +234,8 @@ def main():
     global selected_node
     global iggraph
     global debug_is_mouse_dragging
+    
+    global show_debug_window
 
     # states -------------------------
     
@@ -249,8 +252,10 @@ def main():
     node_grid = iggraph.create_node("Grid Rectangles", imgui.Vec2(400,50))
     node_for_each = iggraph.create_node("For Each Loop", imgui.Vec2(600,100))
     node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(600,300))
-    node_grid.inputs["number of horizontal cells"].value = 20
-    node_grid.inputs["number of vertical cells"].value = 10
+    
+    node_grid.inputs["number of horizontal cells"].value = 10
+    node_grid.inputs["number of vertical cells"].value = 20
+    node_load_image.inputs["url"].url = "c:\\tmp\\rainbow.jpg"
 
     iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_grid.inputs["source image"]))
     iggraph.links.append(NodeLink(node_grid.outputs["cells"], node_for_each.inputs["List to iterate"]))
@@ -301,6 +306,18 @@ def main():
                 )
                 if clicked_quit:
                     exit(0)
+                imgui.end_menu()
+            if imgui.begin_menu("Debug", True):
+                show_debug_window_clicked,  show_debug_window_selected = imgui.menu_item(
+                    "Show Debug window", 'Cmd+D', show_debug_window, True
+                )
+                if show_debug_window_clicked:
+                    show_debug_window = not show_debug_window
+                catch_exceptions_clicked,  catch_exceptions_selected = imgui.menu_item(
+                    "Catch Exceptions", '', iggraph.catch_exceptions, True
+                )
+                if catch_exceptions_clicked:
+                    iggraph.catch_exceptions = not iggraph.catch_exceptions
                 imgui.end_menu()
             imgui.end_main_menu_bar()
 
@@ -509,17 +526,18 @@ def main():
         imgui.end()
 
         #------------------------------------------------------------
-        imgui.begin("Debug", True)
-        if parameter_link_start:
-            imgui.text("parameter_link_start: " + parameter_link_start.id)
-        else:
-            imgui.text("parameter_link_start: " + "None")
-        if selected_parameter:
-            imgui.text("selected_parameter: " + selected_parameter.id)
-        else:
-            imgui.text("selected_parameter: " + "None")
-        imgui.text("is_mouse_dragging: " + str(debug_is_mouse_dragging))
-        imgui.end()
+        if show_debug_window:
+            debug_window_expanded, show_debug_window = imgui.begin("Debug", True)
+            if parameter_link_start:
+                imgui.text("parameter_link_start: " + parameter_link_start.id)
+            else:
+                imgui.text("parameter_link_start: " + "None")
+            if selected_parameter:
+                imgui.text("selected_parameter: " + selected_parameter.id)
+            else:
+                imgui.text("selected_parameter: " + "None")
+            imgui.text("is_mouse_dragging: " + str(debug_is_mouse_dragging))
+            imgui.end()
 
         gl.glClearColor(1., 1., 1., 1)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)

@@ -1,5 +1,6 @@
 import imgui # TODO remove this dependency
 from PIL import Image
+import copy
 
 class IGParameter:
     def __init__(self, type):
@@ -16,13 +17,13 @@ class IGParameter:
         self.timestamp = self.timestamp + 1
 
     def set_value(self, other_parameter):
-        self._value = other_parameter._value.copy()
+        self._value = copy.deepcopy(other_parameter._value)
 
     def backup_value(self):
-        self._backup_value = self._value.copy()
+        self._backup_value = copy.deepcopy(self._value)
 
     def restore_backup_value(self):
-        self._value = self._backup_value.copy()
+        self._value = copy.deepcopy(self._backup_value)
 
 class IGParameterImage(IGParameter):
     def __init__(self):
@@ -166,7 +167,7 @@ class IGParameterCoords(IGParameter):
     def y(self):
         return self._value["y"]
 
-    @x.setter
+    @y.setter
     def y(self, y):
         self._value["y"] = y
 
