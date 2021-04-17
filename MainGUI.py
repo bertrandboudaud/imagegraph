@@ -302,6 +302,17 @@ def main():
 
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):
+                clicked_load, selected_load = imgui.menu_item(
+                    "Load", 'Cmd+L', False, True
+                )
+                if clicked_load:
+                    root = tk.Tk()
+                    root.withdraw()
+                    filename = filedialog.askopenfilename()
+                    if filename :
+                        f=open(filename)
+                        iggraph.from_json(json.load(f))
+                        f.close()
                 clicked_save, selected_save = imgui.menu_item(
                     "Save", 'Cmd+S', False, True
                 )

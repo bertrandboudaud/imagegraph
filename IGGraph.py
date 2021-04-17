@@ -1,5 +1,6 @@
 import imgui # TODO remove this dependency
 from IGLibrary import *
+from IGNode import *
 
 class IGGraph:
     def __init__(self):
@@ -29,8 +30,25 @@ class IGGraph:
         print("todo")
         json_nodes = json["nodes"]
         for json_node in json_nodes:
-            node = self.node_library.create_node(node_name)
+            node = self.node_library.create_node(json_node["name"])
             node.from_json(json_node)
+            self.nodes.append(node)
+        json_links = json["links"]
+        for json_link in json_links:
+            json_output_parameter = json_link["output_parameter"]
+            output_node = self.get_node_from_id(json_output_parameter["node_id"])
+            output_parameter = output_node.outputs[json_output_parameter["parameter_id"]]
+            json_input_parameter = json_link["input_parameter"]
+            input_node = self.get_node_from_id(json_input_parameter["node_id"])
+            input_parameter = input_node.inputs[json_input_parameter["parameter_id"]]
+            link = NodeLink(output_parameter, input_parameter)
+            self.links.append(link)
+
+    def get_node_from_id(self, id):
+        for node in self.nodes:
+            if node.id == id:
+                return node
+        return None
 
     def find_input_parameter_links(self, input_parameter):
         # find output parameters linked to this input parameter

@@ -31,3 +31,9 @@ class IGParameter:
         json["value"] = self._backup_value
         return json
 
+    def from_json(self, json):
+        self.id = json["id"]
+        self.type = json["type"]
+        self._value = json["value"].copy()
+        self._backup_value = json["value"].copy()
+        return json

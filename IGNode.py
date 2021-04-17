@@ -42,26 +42,28 @@ class IGNode:
         json["outputs"] = outputs
         pos = {}
         pos["x"] = self.pos.x
-        pos["y"] = self.pos.x
+        pos["y"] = self.pos.y
         json["pos"] = pos
         size = {}
         size["x"] = self.size.x
-        size["y"] = self.size.x
+        size["y"] = self.size.y
         json["size"] = size
         json["id"] = self.id
         return json
 
     def from_json(self, json):
-        self.inputs = {}
+        json_input_parameters = json["inputs"]
         for input_name in self.inputs:
-            self.inputs[input_name] = self.inputs[input_name].to_json()
-        self.outputs = {}
+            parameter_json = json_input_parameters[input_name]
+            self.inputs[input_name].from_json(parameter_json)
+        json_output_parameters = json["outputs"]
         for output_name in self.outputs:
-            self.outputs[output_name] = self.outputs[output_name].to_json()
-        self.pos.x = pos["x"]
-        self.pos.x = pos["y"]
-        self.size.x = size["x"]
-        self.size.x = size["y"]
+            parameter_json = json_output_parameters[output_name]
+            self.outputs[output_name].from_json(parameter_json)
+        pos = imgui.Vec2(json["pos"]["x"],json["pos"]["y"])
+        self.pos = pos
+        size = imgui.Vec2(json["size"]["x"],json["size"]["y"])
+        self.size = size
         self.id = json["id"]
 
     def set_all_outputs_ready(self):
