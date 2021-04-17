@@ -1,14 +1,16 @@
 from IGParameter import *
 from IGNode import *
+from IGParameterImage import *
+from IGParameterColor import *
 from PIL import ImageOps
 
 class IGColorize(IGNode):
     def __init__(self):
         super().__init__("Colorize Image")
-        self.add_input_parameter("source image", IGParameterImage()) 
-        self.add_input_parameter("black", IGParameterColor()) 
-        self.add_input_parameter("white", IGParameterColor()) 
-        self.add_output_parameter("colorized image", IGParameterImage()) 
+        self.add_input_parameter("source image", IGParameterImage.IGParameterImage()) 
+        self.add_input_parameter("black", IGParameterColor.IGParameterColor()) 
+        self.add_input_parameter("white", IGParameterColor.IGParameterColor()) 
+        self.add_output_parameter("colorized image", IGParameterImage.IGParameterImage()) 
 
     def process(self):
         black = self.inputs["black"].color256()

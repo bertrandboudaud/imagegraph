@@ -1,12 +1,13 @@
 from IGParameter import *
 from IGNode import *
 from PIL import ImageOps
+from IGParameterImage import *
 
 class IGInvertColors(IGNode):
     def __init__(self):
         super().__init__("Invert colors")
-        self.add_input_parameter("source image", IGParameterImage()) 
-        self.add_output_parameter("filtered image", IGParameterImage()) 
+        self.add_input_parameter("source image", IGParameterImage.IGParameterImage()) 
+        self.add_output_parameter("filtered image", IGParameterImage.IGParameterImage()) 
 
     def process(self):
         if self.inputs["source image"].image.mode == 'RGBA':

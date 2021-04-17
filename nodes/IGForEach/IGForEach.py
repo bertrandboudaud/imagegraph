@@ -1,15 +1,18 @@
 from IGParameter import *
 from IGNode import *
 from PIL import ImageOps
+from IGParameterImage import *
+from IGParameterRectangle import *
+from IGParameterList import *
 
 class IGForEach(IGNode):
     def __init__(self):
         super().__init__("For Each Loop")
-        self.add_input_parameter("List to iterate", IGParameterList()) 
-        self.add_input_parameter("Input1", IGParameterImage())
-        self.add_output_parameter("Element", IGParameterRectangle()) 
-        self.add_output_parameter("Output1", IGParameterImage())
-        self.add_output_parameter("Result1", IGParameterImage())
+        self.add_input_parameter("List to iterate", IGParameterList.IGParameterList()) 
+        self.add_input_parameter("Input1", IGParameterImage.IGParameterImage())
+        self.add_output_parameter("Element", IGParameterRectangle.IGParameterRectangle()) 
+        self.add_output_parameter("Output1", IGParameterImage.IGParameterImage())
+        self.add_output_parameter("Result1", IGParameterImage.IGParameterImage())
         self.reset()
     
     def reset(self):

@@ -1,13 +1,15 @@
 from IGParameter import *
 from IGNode import *
 from PIL import ImageOps
+from IGParameterRectangle import *
+from IGParameterCoords import *
 
 class IGGetRelativeCoords(IGNode):
     def __init__(self):
         super().__init__("Relative Coords")
-        self.add_input_parameter("rectangle", IGParameterRectangle())
-        self.add_input_parameter("relative coords", IGParameterCoords()) 
-        self.add_output_parameter("coords", IGParameterCoords())
+        self.add_input_parameter("rectangle", IGParameterRectangle.IGParameterRectangle())
+        self.add_input_parameter("relative coords", IGParameterCoords.IGParameterCoords()) 
+        self.add_output_parameter("coords", IGParameterCoords.IGParameterCoords())
         # default is middle
         self.inputs["relative coords"].x = 0.5
         self.inputs["relative coords"].y = 0.5

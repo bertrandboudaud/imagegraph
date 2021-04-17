@@ -2,7 +2,7 @@ import imgui # TODO remove this dependency
 from IGParameter import *
 from PIL import ImageFilter
 from PIL import ImageOps
-
+from IGLibrary import *
 class NodeLink:
     def __init__(self, output_parameter, input_parameter):
         self.input_parameter = input_parameter
@@ -51,7 +51,7 @@ class IGNode:
         json["id"] = self.id
         return json
 
-    def from_json(self, json)
+    def from_json(self, json):
         self.inputs = {}
         for input_name in self.inputs:
             self.inputs[input_name] = self.inputs[input_name].to_json()

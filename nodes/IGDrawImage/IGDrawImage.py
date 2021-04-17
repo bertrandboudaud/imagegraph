@@ -1,14 +1,16 @@
 from IGParameter import *
+from IGParameterImage import *
+from IGParameterRectangle import *
 from IGNode import *
 from PIL import ImageOps
 
 class IGDrawImage(IGNode):
     def __init__(self):
         super().__init__("Draw Image")
-        self.add_input_parameter("source image", IGParameterImage()) 
-        self.add_input_parameter("image to past", IGParameterImage())
-        self.add_input_parameter("coordinates", IGParameterRectangle()) 
-        self.add_output_parameter("composed image", IGParameterImage()) 
+        self.add_input_parameter("source image", IGParameterImage.IGParameterImage()) 
+        self.add_input_parameter("image to past", IGParameterImage.IGParameterImage())
+        self.add_input_parameter("coordinates", IGParameterRectangle.IGParameterRectangle()) 
+        self.add_output_parameter("composed image", IGParameterImage.IGParameterImage()) 
 
     def process(self):
         source = self.inputs["source image"].image.copy()
