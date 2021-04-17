@@ -10,6 +10,7 @@ from PIL import ImageOps
 import numpy
 from IGNode import *
 from IGGraph import *
+import json
 
 NODE_WINDOW_PADDING = imgui.Vec2(8.0, 8.0)
 previous_key_callback = None
@@ -153,8 +154,8 @@ def display_parameter(parameter):
                     display_height = window_width
                     display_width = image_width / (image_height/float(display_height))
                 imgui.image(image_to_texture.gl_texture, display_width, display_height)
-                imgui.text("width: " + str(image_width))
-                imgui.text("height: " + str(image_height))
+                imgui.text("width: " + str(parameter.image.width))
+                imgui.text("height: " + str(parameter.image.height))
             else:
                 imgui.text("No image available - run workflow or connect an image source")
         elif parameter.type == "Rectangle":
@@ -301,6 +302,19 @@ def main():
 
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):
+                clicked_save, selected_save = imgui.menu_item(
+                    "Save", 'Cmd+S', False, True
+                )
+                if clicked_save:
+                    graph_json = iggraph.to_json()
+                    text2save = json.dumps(graph_json, indent=4, sort_keys=True)
+                    root = tk.Tk()
+                    root.withdraw()
+                    f = filedialog.asksaveasfile(mode='w', defaultextension=".json")
+                    if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
+                        return
+                    f.write(text2save)
+                    f.close()
                 clicked_quit, selected_quit = imgui.menu_item(
                     "Quit", 'Cmd+Q', False, True
                 )

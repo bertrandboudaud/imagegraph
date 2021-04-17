@@ -8,6 +8,18 @@ class NodeLink:
         self.input_parameter = input_parameter
         self.output_parameter = output_parameter
 
+    def to_json(self):
+        json = {}
+        json_parameter = {}
+        json_parameter["node_id"] = self.input_parameter.owner.id
+        json_parameter["parameter_id"] = self.input_parameter.id
+        json["input_parameter"] = json_parameter
+        json_parameter = {}
+        json_parameter["node_id"] = self.output_parameter.owner.id
+        json_parameter["parameter_id"] = self.output_parameter.id
+        json["output_parameter"] = json_parameter
+        return json
+
 class IGNode:
     def __init__(self, name, pos = imgui.Vec2(0,0)):
         self.id = None
@@ -16,6 +28,28 @@ class IGNode:
         self.size = imgui.Vec2(0,0)
         self.inputs = {}
         self.outputs = {}
+
+    def to_json(self):
+        json = {}
+        json["name"] = self.name
+        inputs = {}
+        for input_name in self.inputs:
+            inputs[input_name] = self.inputs[input_name].to_json()
+        json["inputs"] = inputs
+        outputs = {}
+        for output_name in self.outputs:
+            outputs[output_name] = self.outputs[output_name].to_json()
+        json["outputs"] = outputs
+        pos = {}
+        pos["x"] = self.pos.x
+        pos["y"] = self.pos.x
+        json["pos"] = pos
+        size = {}
+        size["x"] = self.size.x
+        size["y"] = self.size.x
+        json["size"] = size
+        json["id"] = self.id
+        return json
 
     def set_all_outputs_ready(self):
         for output_parameter_name in self.outputs:

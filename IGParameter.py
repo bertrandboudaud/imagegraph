@@ -25,6 +25,13 @@ class IGParameter:
     def restore_backup_value(self):
         self._value = copy.deepcopy(self._backup_value)
 
+    def to_json(self):
+        json = {}
+        json["id"]=self.id
+        json["type"]=self.type
+        json["value"] = self._backup_value
+        return json
+
 class IGParameterImage(IGParameter):
     def __init__(self):
         super().__init__("Image")
@@ -37,6 +44,7 @@ class IGParameterImage(IGParameter):
     @image.setter
     def image(self, image):
         self._value["image"] = image
+
 
 class IGParameterRectangle(IGParameter):
     def __init__(self):

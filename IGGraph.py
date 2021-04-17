@@ -13,6 +13,18 @@ class IGGraph:
         self.parameter_run_timestamp = {}
         self.catch_exceptions = True
     
+    def to_json(self):
+        json = {}
+        nodes = []
+        for node in self.nodes:
+            nodes.append(node.to_json())
+        json["nodes"] = nodes
+        links = []
+        for link in self.links:
+            links.append(link.to_json())
+        json["links"] = links
+        return json
+
     def find_input_parameter_links(self, input_parameter):
         # find output parameters linked to this input parameter
         found_parameter = []
@@ -64,12 +76,12 @@ class IGGraph:
                 break
         
     def run_one_step(self):
-        print("-- run one step")
+        # print("-- run one step")
         nodes_to_run = self.find_nodes_to_run()
         if len(nodes_to_run) == 0:
             return False
         for node in nodes_to_run:
-            print("run " + node.name)
+            # print("run " + node.name)
             if not node in self.run_nodes:
                 node.preapre_to_process()
             self.set_inputs(node)
@@ -89,11 +101,21 @@ class IGGraph:
     def is_error(self, node):
         return node in self.error_nodes
     
+    def generate_id(self):
+        self.id_generator = self.id_generator +1
+        found = True
+        while found:
+            found = False
+            for node in self.nodes:
+                if node.id == self.id_generator:
+                    found = True
+                    break
+        return self.id_generator
+
     def create_node(self, node_name, pos = imgui.Vec2(0,0)):
         new_node = self.node_library.create_node(node_name)
-        new_node.id = self.id_generator
+        new_node.id = self.generate_id()
         new_node.pos = pos
-        self.id_generator = self.id_generator +1
         self.nodes.append(new_node)
         return new_node
 
