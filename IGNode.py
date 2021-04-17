@@ -51,6 +51,19 @@ class IGNode:
         json["id"] = self.id
         return json
 
+    def from_json(self, json)
+        self.inputs = {}
+        for input_name in self.inputs:
+            self.inputs[input_name] = self.inputs[input_name].to_json()
+        self.outputs = {}
+        for output_name in self.outputs:
+            self.outputs[output_name] = self.outputs[output_name].to_json()
+        self.pos.x = pos["x"]
+        self.pos.x = pos["y"]
+        self.size.x = size["x"]
+        self.size.x = size["y"]
+        self.id = json["id"]
+
     def set_all_outputs_ready(self):
         for output_parameter_name in self.outputs:
             self.outputs[output_parameter_name].set_ready()

@@ -25,6 +25,13 @@ class IGGraph:
         json["links"] = links
         return json
 
+    def from_json(self, json):
+        print("todo")
+        json_nodes = json["nodes"]
+        for json_node in json_nodes:
+            node = self.node_library.create_node(node_name)
+            node.from_json(json_node)
+
     def find_input_parameter_links(self, input_parameter):
         # find output parameters linked to this input parameter
         found_parameter = []
