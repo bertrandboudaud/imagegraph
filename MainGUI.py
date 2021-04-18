@@ -467,7 +467,7 @@ def main():
                 if imgui.is_item_hovered():
                     print("is_item_hovered")
                     if parameter_link_start:
-                        iggraph.links.append(NodeLink(parameter_link_start, parameter))
+                        iggraph.add_link(parameter_link_start, parameter)
                     else:
                         imgui.begin_tooltip()
                         imgui.text(parameter_name)

@@ -174,4 +174,9 @@ class IGGraph:
             node.reset()
         self.run_nodes = []
         self.error_nodes = {}
-        self.parameter_run_timestamp = {}        
+        self.parameter_run_timestamp = {}
+
+    def add_link(self, output_parameter, input_parameter):
+        output_parameter.notify_connected_to(input_parameter)
+        input_parameter.notify_connected_to(output_parameter)
+        self.links.append(NodeLink(output_parameter, input_parameter))

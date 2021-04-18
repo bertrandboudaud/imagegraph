@@ -4,7 +4,7 @@ import copy
 class IGParameter:
     def __init__(self, type):
         self.id = ""
-        self.type = type
+        self._type = type
         self.owner = None
         self.timestamp = 0
         self.is_ready = False
@@ -37,3 +37,22 @@ class IGParameter:
         self._value = json["value"].copy()
         self._backup_value = json["value"].copy()
         return json
+
+    # override to handle connection to another parameter
+    def notify_connected_to(self, other_parameter):
+        pass
+
+    @property
+    def type(self):
+        return self._type
+
+    def __copy__(self):
+        cpy = object.__new__(type(self))
+        cpy.id = self.id
+        cpy._type = self._type
+        cpy.owner = None
+        cpy.timestamp = self.timestamp
+        cpy.is_ready = self.is_ready
+        cpy._value = self._value.copy()
+        cpy._backup_value = self._backup_value.copy()
+        return cpy
