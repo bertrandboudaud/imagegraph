@@ -224,6 +224,32 @@ width_context = 200
 height_window = 800
 separator_width = 4
 
+def example_mosaic(iggraph):
+    # Example
+    node_load_image = iggraph.create_node("Load Image", imgui.Vec2(200,100))
+    node_load_image2 = iggraph.create_node("Load Image", imgui.Vec2(200,500))
+    node_relative_coord = iggraph.create_node("Relative Coords", imgui.Vec2(400,400))
+    node_pixel_color = iggraph.create_node("Pixel Color", imgui.Vec2(600,400))
+    node_colorize_image = iggraph.create_node("Colorize Image", imgui.Vec2(800,400))
+    node_grid = iggraph.create_node("Grid Rectangles", imgui.Vec2(400,50))
+    node_for_each = iggraph.create_node("For Each Loop", imgui.Vec2(600,100))
+    node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(600,300))
+    node_grid.inputs["number of horizontal cells"].value = 10
+    node_grid.inputs["number of vertical cells"].value = 20
+    node_load_image.inputs["url"].url = "c:\\tmp\\rainbow.jpg"
+    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_grid.inputs["source image"]))
+    iggraph.links.append(NodeLink(node_grid.outputs["cells"], node_for_each.inputs["List to iterate"]))
+    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_for_each.inputs["Input1"]))
+    iggraph.links.append(NodeLink(node_for_each.outputs["Element"], node_relative_coord.inputs["rectangle"]))
+    iggraph.links.append(NodeLink(node_relative_coord.outputs["coords"], node_pixel_color.inputs["coords"]))
+    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_pixel_color.inputs["image"]))
+    iggraph.links.append(NodeLink(node_pixel_color.outputs["pixel color"], node_colorize_image.inputs["white"]))
+    iggraph.links.append(NodeLink(node_load_image2.outputs["loaded image"], node_colorize_image.inputs["source image"]))
+    iggraph.links.append(NodeLink(node_for_each.outputs["Element"], node_draw_image.inputs["coordinates"]))
+    iggraph.links.append(NodeLink(node_for_each.outputs["Output1"], node_draw_image.inputs["source image"]))
+    iggraph.links.append(NodeLink(node_colorize_image.outputs["colorized image"], node_draw_image.inputs["image to past"]))
+    iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
+
 def main():
     global width_library
     global width_shematic
@@ -243,33 +269,6 @@ def main():
     scrolling = imgui.Vec2(0, 0)
 
     iggraph = IGGraph()
-
-    # Example
-    node_load_image = iggraph.create_node("Load Image", imgui.Vec2(200,100))
-    node_load_image2 = iggraph.create_node("Load Image", imgui.Vec2(200,500))
-    node_relative_coord = iggraph.create_node("Relative Coords", imgui.Vec2(400,400))
-    node_pixel_color = iggraph.create_node("Pixel Color", imgui.Vec2(600,400))
-    node_colorize_image = iggraph.create_node("Colorize Image", imgui.Vec2(800,400))
-    node_grid = iggraph.create_node("Grid Rectangles", imgui.Vec2(400,50))
-    node_for_each = iggraph.create_node("For Each Loop", imgui.Vec2(600,100))
-    node_draw_image = iggraph.create_node("Draw Image", imgui.Vec2(600,300))
-    
-    node_grid.inputs["number of horizontal cells"].value = 10
-    node_grid.inputs["number of vertical cells"].value = 20
-    node_load_image.inputs["url"].url = "c:\\tmp\\rainbow.jpg"
-
-    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_grid.inputs["source image"]))
-    iggraph.links.append(NodeLink(node_grid.outputs["cells"], node_for_each.inputs["List to iterate"]))
-    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_for_each.inputs["Input1"]))
-    iggraph.links.append(NodeLink(node_for_each.outputs["Element"], node_relative_coord.inputs["rectangle"]))
-    iggraph.links.append(NodeLink(node_relative_coord.outputs["coords"], node_pixel_color.inputs["coords"]))
-    iggraph.links.append(NodeLink(node_load_image.outputs["loaded image"], node_pixel_color.inputs["image"]))
-    iggraph.links.append(NodeLink(node_pixel_color.outputs["pixel color"], node_colorize_image.inputs["white"]))
-    iggraph.links.append(NodeLink(node_load_image2.outputs["loaded image"], node_colorize_image.inputs["source image"]))
-    iggraph.links.append(NodeLink(node_for_each.outputs["Element"], node_draw_image.inputs["coordinates"]))
-    iggraph.links.append(NodeLink(node_for_each.outputs["Output1"], node_draw_image.inputs["source image"]))
-    iggraph.links.append(NodeLink(node_colorize_image.outputs["colorized image"], node_draw_image.inputs["image to past"]))
-    iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
 
     # iggraph.reset()
 
@@ -317,6 +316,7 @@ def main():
                     "Save", 'Cmd+S', False, True
                 )
                 if clicked_save:
+                    iggraph.reset()
                     graph_json = iggraph.to_json()
                     text2save = json.dumps(graph_json, indent=4, sort_keys=True)
                     root = tk.Tk()
@@ -343,6 +343,15 @@ def main():
                 )
                 if catch_exceptions_clicked:
                     iggraph.catch_exceptions = not iggraph.catch_exceptions
+                imgui.separator()
+                imgui.menu_item(
+                    "Examples", '', False, False
+                )
+                show_example_mosaic_clicked,  show_example_mosaic_selected = imgui.menu_item(
+                    "Mosaic", '', False, True
+                )
+                if show_example_mosaic_clicked:
+                    example_mosaic(iggraph)
                 imgui.end_menu()
             imgui.end_main_menu_bar()
 
