@@ -5,13 +5,13 @@ import copy
 class IGParameterText(IGParameter):
     def __init__(self):
         super().__init__("Text")
-        self._value["text"] = 0
-
+        self._value["text"] = ""
+  
     @property
-    def value(self):
+    def text(self):
         return self._value["text"]
 
-    @value.setter
-    def value(self, value):
-        self._value["text"] = value
+    @text.setter
+    def text(self, text):
+        self._value["text"] = text
 

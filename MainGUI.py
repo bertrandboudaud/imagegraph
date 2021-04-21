@@ -19,6 +19,7 @@ selected_node = None
 iggraph = None
 debug_is_mouse_dragging = False
 show_debug_window = False
+slider_indexes = {}
 
 class ImageToTexture:
     def __init__(self):
@@ -136,8 +137,16 @@ def get_node_color(node, iggraph, hovered):
         node_color = imgui.get_color_u32_rgba(0,0.5,1,0.7)
     return node_color
 
-def display_parameter(parameter):
+def display_parameter(parameter, editable):
+    global slider_indexes
     if imgui.tree_node(parameter.id):
+        if parameter.type == "List":
+            if parameter.id not in slider_indexes:
+                slider_indexes[parameter.id] = 0
+            changed, values = imgui.slider_int("index", slider_indexes[parameter.id], 0, len(parameter.list)-1)
+            if changed:
+                slider_indexes[parameter.id] = values
+            display_parameter(parameter.list[slider_indexes[parameter.id]], editable)
         if parameter.type == "Image":
             if parameter.image:
                 image_to_texture = get_gl_texture(parameter.image, parameter.timestamp)
@@ -159,46 +168,64 @@ def display_parameter(parameter):
             else:
                 imgui.text("No image available - run workflow or connect an image source")
         elif parameter.type == "Rectangle":
-            changed, value = imgui.input_float("Left", parameter.left)
-            if changed:
-                parameter.left = value
-            changed, value = imgui.input_float("Top", parameter.top)
-            if changed:
-                parameter.top = value
-            changed, value = imgui.input_float("Right", parameter.right)
-            if changed:
-                parameter.right = value
-            changed, value = imgui.input_float("Bottom", parameter.bottom)
-            if changed:
-                parameter.left = value
+            if editable:
+                changed, value = imgui.input_float("Left", parameter.left)
+                if changed:
+                    parameter.left = value
+                changed, value = imgui.input_float("Top", parameter.top)
+                if changed:
+                    parameter.top = value
+                changed, value = imgui.input_float("Right", parameter.right)
+                if changed:
+                    parameter.right = value
+                changed, value = imgui.input_float("Bottom", parameter.bottom)
+                if changed:
+                    parameter.left = value
+            else:
+                imgui.text("Left: " + str(parameter.left))
+                imgui.text("Top: " + str(parameter.top))
+                imgui.text("Right: " + str(parameter.right))
+                imgui.text("Bottom: " + str(parameter.bottom))
         elif parameter.type == "Coordinates":
-            changed, value = imgui.input_float("x", parameter.x)
-            if changed:
-                parameter.x = value
-            changed, value = imgui.input_float("y", parameter.y)
-            if changed:
-                parameter.y = value
+            if editbale:
+                changed, value = imgui.input_float("x", parameter.x)
+                if changed:
+                    parameter.x = value
+                changed, value = imgui.input_float("y", parameter.y)
+                if changed:
+                    parameter.y = value
+            else:
+                imgui.text("x: " + str(parameter.x))
+                imgui.text("y: " + str(parameter.y))
         elif parameter.type == "Integer": # to do change to "number"
-            changed, value = imgui.input_int("Value", parameter.value)
-            if changed:
-                parameter.value = value
+            if editable:
+                changed, value = imgui.input_int("Value", parameter.value)
+                if changed:
+                    parameter.value = value
+            else:
+                imgui.text("Value: " + strparameter.value)
         elif parameter.type == "Color":
             changed, color = imgui.color_edit4(parameter.id, parameter.r, parameter.g, parameter.b, parameter.a)
-            if changed:
+            if editable and changed:
                 parameter.r = color[0]
                 parameter.g = color[1]
                 parameter.b = color[2]
                 parameter.a = color[3]
         elif parameter.type == "URL":
             changed, textval = imgui.input_text(parameter.id, parameter.url, 1024)
-            if changed:
+            if editable and changed:
                 parameter.url = textval
-            if imgui.button("browse..."):
-                root = tk.Tk()
-                root.withdraw()
-                file_path = filedialog.askopenfilename()
-                if file_path:
-                    parameter.url = file_path
+            if editable:
+                if imgui.button("browse..."):
+                    root = tk.Tk()
+                    root.withdraw()
+                    file_path = filedialog.askopenfilename()
+                    if file_path:
+                        parameter.url = file_path
+        elif parameter.type == "Text":
+            changed, textval = imgui.input_text(parameter.id, parameter.text, 1024)
+            if editable and changed:
+                parameter.text = textval
         imgui.tree_pop()
 
 def key_event(window,key,scancode,action,mods):
@@ -418,6 +445,7 @@ def main():
             draw_link_param_to_param(draw_list, offset, link.output_parameter, link.input_parameter, selected_link == link)
 
         # Display nodes
+        parameter_link_end = None
         for node in iggraph.nodes:
             imgui.push_id(str(node.id))
             node_rect_min = add(offset, node.pos)
@@ -465,13 +493,16 @@ def main():
                 if (imgui.invisible_button("input", io_anchors_width, io_anchors_width)):
                     selected_parameter = parameter
                 if imgui.is_item_hovered():
-                    print("is_item_hovered")
-                    if parameter_link_start:
-                        iggraph.add_link(parameter_link_start, parameter)
-                    else:
                         imgui.begin_tooltip()
                         imgui.text(parameter_name)
                         imgui.end_tooltip()
+                # item_hovered does not work when dragging
+                is_hovering = ((io.mouse_pos.x-offset.x>center.x-io_anchors_width/2) and 
+                               (io.mouse_pos.x-offset.x<center.x+io_anchors_width/2) and
+                               (io.mouse_pos.y-offset.y>center.y-io_anchors_width/2) and
+                               (io.mouse_pos.y-offset.y<center.y+io_anchors_width/2))
+                if is_hovering and imgui.is_mouse_released(0):
+                    parameter_link_end = parameter
                 imgui.pop_id()
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
 
@@ -502,11 +533,12 @@ def main():
         draw_list.channels_merge()
 
         debug_is_mouse_dragging = imgui.is_mouse_dragging(0)
-        if parameter_link_start and imgui.is_mouse_dragging(0):
+        if parameter_link_start and parameter_link_end:
+            iggraph.add_link(parameter_link_start, parameter_link_end)
+        elif parameter_link_start and imgui.is_mouse_dragging(0):
             draw_link_param_to_point(draw_list, offset, parameter_link_start, io.mouse_pos.x, io.mouse_pos.y, True)
-        elif parameter_link_start and not imgui.is_mouse_dragging(0):
+        if imgui.is_mouse_released(0):
             parameter_link_start = None
-            print("parameter_link_start -> None")
 
         imgui.pop_item_width()
         imgui.end_child()
@@ -546,12 +578,12 @@ def main():
             if imgui.tree_node("Inputs"):
                 for parameter_name in selected_node.inputs:
                     parameter = selected_node.inputs[parameter_name]
-                    display_parameter(parameter)
+                    display_parameter(parameter, True)
                 imgui.tree_pop()
             if imgui.tree_node("Output"):
                 for parameter_name in selected_node.outputs:
                     parameter = selected_node.outputs[parameter_name]
-                    display_parameter(parameter)
+                    display_parameter(parameter, False)
                 imgui.tree_pop()
         imgui.end_child()
         imgui.pop_style_var()
@@ -571,6 +603,7 @@ def main():
             else:
                 imgui.text("selected_parameter: " + "None")
             imgui.text("is_mouse_dragging: " + str(debug_is_mouse_dragging))
+            imgui.text("mouse.x: " + str(io.mouse_pos.x))
             imgui.end()
 
         gl.glClearColor(1., 1., 1., 1)

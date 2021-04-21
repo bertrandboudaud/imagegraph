@@ -1,6 +1,12 @@
 import imgui # TODO remove this dependency
 from IGLibrary import *
 from IGNode import *
+from enum import Enum
+
+class IGGraphState(Enum):
+    IDLE = 1
+    WAIT_INPUT = 2
+    RUN = 3
 
 class IGGraph:
     def __init__(self):
@@ -13,6 +19,8 @@ class IGGraph:
         self.timestamp = 1
         self.parameter_run_timestamp = {}
         self.catch_exceptions = True
+        self.status = IGGraphState.IDLE
+        self.input_nodes = []
     
     def to_json(self):
         json = {}
@@ -93,9 +101,16 @@ class IGGraph:
                     parameter.set_value(output_parameter)
                 # TODO handle the case (error?) where several outputs are ready
 
+    def set_input_nodes(self):
+        self.input_nodes = []
+        for node in self.nodes:
+            if node.type == "Input":
+                self.input_nodes.append(node)
+
     def run(self):
         self.run_nodes = []
         self.error_nodes = {}
+        self.set_input_nodes()
         while True:
             if not self.run_one_step():
                 break
@@ -175,6 +190,7 @@ class IGGraph:
         self.run_nodes = []
         self.error_nodes = {}
         self.parameter_run_timestamp = {}
+        self.status = IGGraphState.IDLE
 
     def add_link(self, output_parameter, input_parameter):
         output_parameter.notify_connected_to(input_parameter)
