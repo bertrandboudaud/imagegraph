@@ -16,13 +16,16 @@ class IGParameter:
         self.timestamp = self.timestamp + 1
 
     def set_value(self, other_parameter):
-        self._value = copy.deepcopy(other_parameter._value)
+        self._value = copy.deepcopy(other_parameter.get_value())
 
     def backup_value(self):
-        self._backup_value = copy.deepcopy(self._value)
+        self._backup_value = copy.deepcopy(self.get_value())
 
     def restore_backup_value(self):
-        self._value = copy.deepcopy(self._backup_value)
+        self._value = copy.deepcopy(self.get_value())
+
+    def get_value(self):
+        return self._value
 
     def to_json(self):
         json = {}
@@ -39,7 +42,7 @@ class IGParameter:
         return json
 
     # override to handle connection to another parameter
-    def notify_connected_to(self, other_parameter):
+    def on_connected_to(self, other_parameter):
         pass
 
     @property

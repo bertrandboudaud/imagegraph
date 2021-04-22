@@ -139,94 +139,92 @@ def get_node_color(node, iggraph, hovered):
 
 def display_parameter(parameter, editable):
     global slider_indexes
-    if imgui.tree_node(parameter.id):
-        if parameter.type == "List":
-            if parameter.id not in slider_indexes:
-                slider_indexes[parameter.id] = 0
-            changed, values = imgui.slider_int("index", slider_indexes[parameter.id], 0, len(parameter.list)-1)
+    if parameter.type == "List":
+        if parameter.id not in slider_indexes:
+            slider_indexes[parameter.id] = 0
+        changed, values = imgui.slider_int("index", slider_indexes[parameter.id], 0, len(parameter.list)-1)
+        if changed:
+            slider_indexes[parameter.id] = values
+        display_parameter(parameter.list[slider_indexes[parameter.id]], editable)
+    if parameter.type == "Image":
+        if parameter.image:
+            image_to_texture = get_gl_texture(parameter.image, parameter.timestamp)
+            # imgui.image(image_texture, image_width, image_height)
+            window_width = 256 # imgui.get_window_width()
+            display_width = 0
+            display_height = 0
+            image_width = image_to_texture.gl_widh
+            image_height = image_to_texture.gl_height
+            if image_width >= image_height:
+                display_width = window_width
+                display_height = image_height / (image_width/float(display_width))
+            else:
+                display_height = window_width
+                display_width = image_width / (image_height/float(display_height))
+            imgui.image(image_to_texture.gl_texture, display_width, display_height)
+            imgui.text("width: " + str(parameter.image.width))
+            imgui.text("height: " + str(parameter.image.height))
+        else:
+            imgui.text("No image available - run workflow or connect an image source")
+    elif parameter.type == "Rectangle":
+        if editable:
+            changed, value = imgui.input_float("Left", parameter.left)
             if changed:
-                slider_indexes[parameter.id] = values
-            display_parameter(parameter.list[slider_indexes[parameter.id]], editable)
-        if parameter.type == "Image":
-            if parameter.image:
-                image_to_texture = get_gl_texture(parameter.image, parameter.timestamp)
-                # imgui.image(image_texture, image_width, image_height)
-                window_width = 256 # imgui.get_window_width()
-                display_width = 0
-                display_height = 0
-                image_width = image_to_texture.gl_widh
-                image_height = image_to_texture.gl_height
-                if image_width >= image_height:
-                    display_width = window_width
-                    display_height = image_height / (image_width/float(display_width))
-                else:
-                    display_height = window_width
-                    display_width = image_width / (image_height/float(display_height))
-                imgui.image(image_to_texture.gl_texture, display_width, display_height)
-                imgui.text("width: " + str(parameter.image.width))
-                imgui.text("height: " + str(parameter.image.height))
-            else:
-                imgui.text("No image available - run workflow or connect an image source")
-        elif parameter.type == "Rectangle":
-            if editable:
-                changed, value = imgui.input_float("Left", parameter.left)
-                if changed:
-                    parameter.left = value
-                changed, value = imgui.input_float("Top", parameter.top)
-                if changed:
-                    parameter.top = value
-                changed, value = imgui.input_float("Right", parameter.right)
-                if changed:
-                    parameter.right = value
-                changed, value = imgui.input_float("Bottom", parameter.bottom)
-                if changed:
-                    parameter.left = value
-            else:
-                imgui.text("Left: " + str(parameter.left))
-                imgui.text("Top: " + str(parameter.top))
-                imgui.text("Right: " + str(parameter.right))
-                imgui.text("Bottom: " + str(parameter.bottom))
-        elif parameter.type == "Coordinates":
-            if editbale:
-                changed, value = imgui.input_float("x", parameter.x)
-                if changed:
-                    parameter.x = value
-                changed, value = imgui.input_float("y", parameter.y)
-                if changed:
-                    parameter.y = value
-            else:
-                imgui.text("x: " + str(parameter.x))
-                imgui.text("y: " + str(parameter.y))
-        elif parameter.type == "Integer": # to do change to "number"
-            if editable:
-                changed, value = imgui.input_int("Value", parameter.value)
-                if changed:
-                    parameter.value = value
-            else:
-                imgui.text("Value: " + strparameter.value)
-        elif parameter.type == "Color":
-            changed, color = imgui.color_edit4(parameter.id, parameter.r, parameter.g, parameter.b, parameter.a)
-            if editable and changed:
-                parameter.r = color[0]
-                parameter.g = color[1]
-                parameter.b = color[2]
-                parameter.a = color[3]
-        elif parameter.type == "URL":
-            changed, textval = imgui.input_text(parameter.id, parameter.url, 1024)
-            if editable and changed:
-                parameter.url = textval
-            if editable:
-                if imgui.button("browse..."):
-                    root = tk.Tk()
-                    root.withdraw()
-                    file_path = filedialog.askopenfilename()
-                    if file_path:
-                        parameter.url = file_path
-        elif parameter.type == "Text":
-            changed, textval = imgui.input_text(parameter.id, parameter.text, 1024)
-            if editable and changed:
-                parameter.text = textval
-        imgui.tree_pop()
+                parameter.left = value
+            changed, value = imgui.input_float("Top", parameter.top)
+            if changed:
+                parameter.top = value
+            changed, value = imgui.input_float("Right", parameter.right)
+            if changed:
+                parameter.right = value
+            changed, value = imgui.input_float("Bottom", parameter.bottom)
+            if changed:
+                parameter.left = value
+        else:
+            imgui.text("Left: " + str(parameter.left))
+            imgui.text("Top: " + str(parameter.top))
+            imgui.text("Right: " + str(parameter.right))
+            imgui.text("Bottom: " + str(parameter.bottom))
+    elif parameter.type == "Coordinates":
+        if editbale:
+            changed, value = imgui.input_float("x", parameter.x)
+            if changed:
+                parameter.x = value
+            changed, value = imgui.input_float("y", parameter.y)
+            if changed:
+                parameter.y = value
+        else:
+            imgui.text("x: " + str(parameter.x))
+            imgui.text("y: " + str(parameter.y))
+    elif parameter.type == "Integer": # to do change to "number"
+        if editable:
+            changed, value = imgui.input_int("Value", parameter.value)
+            if changed:
+                parameter.value = value
+        else:
+            imgui.text("Value: " + str(parameter.value))
+    elif parameter.type == "Color":
+        changed, color = imgui.color_edit4(parameter.id, parameter.r, parameter.g, parameter.b, parameter.a)
+        if editable and changed:
+            parameter.r = color[0]
+            parameter.g = color[1]
+            parameter.b = color[2]
+            parameter.a = color[3]
+    elif parameter.type == "URL":
+        changed, textval = imgui.input_text(parameter.id, parameter.url, 1024)
+        if editable and changed:
+            parameter.url = textval
+        if editable:
+            if imgui.button("browse..."):
+                root = tk.Tk()
+                root.withdraw()
+                file_path = filedialog.askopenfilename()
+                if file_path:
+                    parameter.url = file_path
+    elif parameter.type == "Text":
+        changed, textval = imgui.input_text(parameter.id, parameter.text, 1024)
+        if editable and changed:
+            parameter.text = textval
 
 def key_event(window,key,scancode,action,mods):
     global iggraph
@@ -420,7 +418,18 @@ def main():
 
         # create our child canvas
         if imgui.button("run"):
-            iggraph.run()
+            imgui.open_popup("User Input")
+        if imgui.begin_popup("User Input", 0):
+            input_nodes = iggraph.get_input_nodes()
+            for input_node in input_nodes:
+                default_value = input_node.inputs["default value"]
+                if imgui.tree_node(input_node.inputs["parameter name"].text):
+                    display_parameter(default_value,True)
+                    imgui.tree_pop()
+            imgui.separator()
+            if imgui.button("run workflow"):
+                iggraph.run()
+            imgui.end_popup()
         imgui.same_line()
         if imgui.button("run one step"):
             iggraph.run_one_step()
@@ -578,12 +587,16 @@ def main():
             if imgui.tree_node("Inputs"):
                 for parameter_name in selected_node.inputs:
                     parameter = selected_node.inputs[parameter_name]
-                    display_parameter(parameter, True)
+                    if imgui.tree_node(parameter.id):
+                        display_parameter(parameter, True)
+                        imgui.tree_pop()
                 imgui.tree_pop()
             if imgui.tree_node("Output"):
                 for parameter_name in selected_node.outputs:
                     parameter = selected_node.outputs[parameter_name]
-                    display_parameter(parameter, False)
+                    if imgui.tree_node(parameter.id):
+                        display_parameter(parameter, False)
+                        imgui.tree_pop()
                 imgui.tree_pop()
         imgui.end_child()
         imgui.pop_style_var()

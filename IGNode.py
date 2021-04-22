@@ -120,6 +120,12 @@ class IGNode:
             parameter.restore_backup_value()
             parameter.is_ready = False
 
+    def on_output_connected_to(self, input_parameter):
+        pass
+
+    def on_input_connected_to(self, output_parameter):
+        pass
+
 class IGCreateImage(IGNode):
     def __init__(self, id):
         super().__init__(id, "Create Image")
