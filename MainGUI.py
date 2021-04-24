@@ -275,6 +275,42 @@ def example_mosaic(iggraph):
     iggraph.links.append(NodeLink(node_colorize_image.outputs["colorized image"], node_draw_image.inputs["image to past"]))
     iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
 
+def show_outputs_popup(iggraph):
+    if imgui.begin_popup("Outputs", 0):
+        output_nodes = iggraph.get_output_nodes()
+        for output_node in output_nodes:
+            value = output_node.outputs["output"]
+            if imgui.tree_node(output_node.inputs["parameter name"].text):
+                display_parameter(value,True)
+                imgui.tree_pop()
+        imgui.separator()
+        if imgui.button("ok"):
+            imgui.close_current_popup()
+        imgui.end_popup()
+
+def show_inputs_popup(iggraph):
+    show_result = False
+    if imgui.begin_popup("User Input", 0):
+        input_nodes = iggraph.get_input_nodes()
+        for input_node in input_nodes:
+            default_value = input_node.inputs["default value"]
+            if imgui.tree_node(input_node.inputs["parameter name"].text):
+                display_parameter(default_value,True)
+                imgui.tree_pop()
+        imgui.separator()
+        if imgui.button("run workflow"):
+            imgui.close_current_popup()
+            # iggraph.reset()
+            iggraph.run()
+            show_result = True
+        imgui.same_line()
+        if imgui.button("cancel"):
+            iggraph.reset()
+            iggraph.set_state(iggraph.STATE_IDLE)
+            imgui.close_current_popup()
+        imgui.end_popup()
+    return show_result
+
 def main():
     global width_library
     global width_shematic
@@ -416,26 +452,35 @@ def main():
         imgui.push_style_var(imgui.STYLE_CHILD_BORDERSIZE, 0)
         imgui.begin_child("shematic", width_shematic, 0, True)
 
+        if show_inputs_popup(iggraph):
+            imgui.open_popup("Outputs")
+        show_outputs_popup(iggraph)
+
         # create our child canvas
-        if imgui.button("run"):
-            imgui.open_popup("User Input")
-        if imgui.begin_popup("User Input", 0):
-            input_nodes = iggraph.get_input_nodes()
-            for input_node in input_nodes:
-                default_value = input_node.inputs["default value"]
-                if imgui.tree_node(input_node.inputs["parameter name"].text):
-                    display_parameter(default_value,True)
-                    imgui.tree_pop()
-            imgui.separator()
-            if imgui.button("run workflow"):
-                iggraph.run()
-            imgui.end_popup()
+        if iggraph.get_state() == iggraph.STATE_IDLE:
+            imgui.text("status: edit | ")
+        elif iggraph.get_state() == iggraph.STATE_RUNNING:
+            imgui.text("status: run  | ")
         imgui.same_line()
-        if imgui.button("run one step"):
-            iggraph.run_one_step()
-        imgui.same_line()
-        if imgui.button("reset"):
-            iggraph.reset()
+        if iggraph.get_state() == iggraph.STATE_IDLE:
+            if imgui.button("run"):
+                #TODO if not running
+                iggraph.set_state(iggraph.STATE_RUNNING)
+                iggraph.prepare_to_run()
+                imgui.open_popup("User Input")
+            imgui.same_line()
+            if imgui.button("run one step"):
+                iggraph.set_state(iggraph.STATE_RUNNING)
+                iggraph.prepare_to_run()
+                iggraph.run_one_step()
+        elif iggraph.get_state() == iggraph.STATE_RUNNING:
+            if imgui.button("stop running"):
+                iggraph.reset()
+                iggraph.set_state(iggraph.STATE_IDLE)
+            imgui.same_line()
+            if imgui.button("run one step"):
+                iggraph.set_state(iggraph.STATE_RUNNING)
+                iggraph.run_one_step()
         # imgui.same_line(imgui.get_window_width() - 100)
         imgui.push_style_var(imgui.STYLE_FRAME_PADDING, imgui.Vec2(1, 1))
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, imgui.Vec2(0, 0))

@@ -22,7 +22,7 @@ class IGParameter:
         self._backup_value = copy.deepcopy(self.get_value())
 
     def restore_backup_value(self):
-        self._value = copy.deepcopy(self.get_value())
+        self._value = copy.deepcopy(self._backup_value)
 
     def get_value(self):
         return self._value

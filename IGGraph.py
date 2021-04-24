@@ -4,6 +4,10 @@ from IGNode import *
 from enum import Enum
 
 class IGGraph:
+
+    STATE_IDLE = 1
+    STATE_RUNNING = 2
+
     def __init__(self):
         self.nodes = []
         self.links = []
@@ -14,6 +18,7 @@ class IGGraph:
         self.timestamp = 1
         self.parameter_run_timestamp = {}
         self.catch_exceptions = True
+        self.state = self.STATE_IDLE
     
     def to_json(self):
         json = {}
@@ -26,6 +31,12 @@ class IGGraph:
             links.append(link.to_json())
         json["links"] = links
         return json
+
+    def set_state(self, state):
+        self.state = state
+
+    def get_state(self):
+        return self.state
 
     def from_json(self, json):
         print("todo")
@@ -101,6 +112,13 @@ class IGGraph:
                 input_nodes.append(node)
         return input_nodes
 
+    def get_output_nodes(self):
+        output_nodes = []
+        for node in self.nodes:
+            if node.name == "Output":
+                output_nodes.append(node)
+        return output_nodes
+
     def run(self):
         self.run_nodes = []
         self.error_nodes = {}
@@ -115,8 +133,6 @@ class IGGraph:
             return False
         for node in nodes_to_run:
             # print("run " + node.name)
-            if not node in self.run_nodes:
-                node.preapre_to_process()
             self.set_inputs(node)
             try:
                 node.process()
@@ -163,13 +179,6 @@ class IGGraph:
         self.nodes.remove(node)
 
     def update_timestamps(self, node):
-        #for parameter_name in node.inputs:
-        #    parameter = node.inputs[parameter_name]
-        #    parameter.timestamp = self.timestamp
-        #for parameter_name in node.outputs:
-        #    parameter = node.outputs[parameter_name]
-        #    parameter.timestamp = self.timestamp
-        #self.timestamp = self.timestamp + 1
         for parameter_name in node.inputs:
             parameter = node.inputs[parameter_name]
             linked_outputs = self.find_input_parameter_links(parameter)
@@ -191,3 +200,7 @@ class IGGraph:
         input_parameter.on_connected_to(output_parameter)
         input_parameter.owner.on_input_connected_to(output_parameter)
         self.links.append(NodeLink(output_parameter, input_parameter))
+
+    def prepare_to_run(self):
+        for node in self.nodes:
+            node.preapre_to_process()

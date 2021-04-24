@@ -21,13 +21,16 @@ class IGParameterMutable(IGParameter):
             return None
 
     def set_value(self, other_parameter):
-        self.user_parameter.set_value(other_parameter)
+        if (self.user_parameter):
+            self.user_parameter.set_value(other_parameter)
 
     def backup_value(self):
-        self._backup_value = copy.deepcopy(self.get_value())
+        if (self.user_parameter):
+            self.user_parameter.backup_value()
 
     def restore_backup_value(self):
-        self.user_parameter.set_value(_backup_value)
+        if (self.user_parameter):
+            self.user_parameter.restore_backup_value()
 
     @property
     def type(self):
