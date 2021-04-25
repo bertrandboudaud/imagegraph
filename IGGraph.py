@@ -53,8 +53,7 @@ class IGGraph:
             json_input_parameter = json_link["input_parameter"]
             input_node = self.get_node_from_id(json_input_parameter["node_id"])
             input_parameter = input_node.inputs[json_input_parameter["parameter_id"]]
-            link = NodeLink(output_parameter, input_parameter)
-            self.links.append(link)
+            self.add_link(output_parameter, input_parameter)
 
     def get_node_from_id(self, id):
         for node in self.nodes:

@@ -6,13 +6,23 @@ class IGParameterMutable(IGParameter):
     def __init__(self):
         super().__init__("Generic Output")
         self.user_parameter = None
+        # used to be applied once the parameter is muted
+        # loading phase
+        self.user_parameter_json = None
 
     def on_connected_to(self, other_parameter):
         self.mute_to(other_parameter)
 
+    # TODO: disconnection
+    # - unmute
+    # - remove user_parameter_json
+
     def mute_to(self, other_parameter):
         self.user_parameter = copy.copy(other_parameter)
-        self.set_value(other_parameter)
+        if self.user_parameter_json:
+            self.__dict__['user_parameter'] = self.__dict__['user_parameter'].from_json(self.__dict__['user_parameter_json'])
+        else:
+            self.set_value(other_parameter)
 
     def get_value(self):
         if self.user_parameter:
@@ -48,3 +58,17 @@ class IGParameterMutable(IGParameter):
             return self.__dict__['user_parameter'].__setattr__(name, value)
         else:
             self.__dict__[name] = value
+
+    def to_json(self):
+        json = {}
+        json["id"] = self.__dict__['id']
+        json["type"] = self.__dict__['_type']
+        json["user_parameter"] = self.__dict__['user_parameter'].to_json()
+        return json
+
+    def from_json(self, json):
+        self.__dict__['id'] = json["id"]
+        self.__dict__['type'] = json["type"]
+        # will be applied later on the connection
+        self.__dict__['user_parameter_json'] = json["user_parameter"]
+        return json

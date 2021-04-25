@@ -36,10 +36,10 @@ class IGParameter:
 
     def from_json(self, json):
         self.id = json["id"]
-        self.type = json["type"]
+        self._type = json["type"]
         self._value = json["value"].copy()
         self._backup_value = json["value"].copy()
-        return json
+        return self
 
     # override to handle connection to another parameter
     def on_connected_to(self, other_parameter):
