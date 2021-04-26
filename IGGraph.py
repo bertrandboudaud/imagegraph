@@ -150,13 +150,13 @@ class IGGraph:
         return node in self.error_nodes
     
     def generate_id(self):
-        self.id_generator = self.id_generator +1
-        found = True
-        while found:
-            found = False
+        id_exists = True
+        while id_exists:
+            self.id_generator = self.id_generator +1
+            id_exists = False
             for node in self.nodes:
                 if node.id == self.id_generator:
-                    found = True
+                    id_exists = True
                     break
         return self.id_generator
 

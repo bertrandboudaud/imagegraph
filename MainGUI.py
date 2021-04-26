@@ -337,12 +337,13 @@ def main():
     parameter_link_start = None
     selected_parameter = None
 
-    io_anchors_width = 10
+    io_hovered = None 
+    io_anchors_width_not_hovered = 10
+    io_anchors_width_hovered = 15 
     
     image_width = 0
     image_height = 0
     image_texture = None
-
 
     # states -------------------------
 
@@ -500,6 +501,7 @@ def main():
 
         # Display nodes
         parameter_link_end = None
+        one_parameter_hovered = False
         for node in iggraph.nodes:
             imgui.push_id(str(node.id))
             node_rect_min = add(offset, node.pos)
@@ -542,19 +544,25 @@ def main():
                 parameter = node.inputs[parameter_name]
                 center = node.get_intput_slot_pos(parameter)
                 center_with_offset = add(offset, center)
+                if io_hovered == parameter:
+                    io_anchors_width = io_anchors_width_hovered
+                else:
+                    io_anchors_width = io_anchors_width_not_hovered
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
                 imgui.push_id(str(str(node.id) + "input" + parameter.id))
                 if (imgui.invisible_button("input", io_anchors_width, io_anchors_width)):
                     selected_parameter = parameter
-                if imgui.is_item_hovered():
-                        imgui.begin_tooltip()
-                        imgui.text(parameter_name)
-                        imgui.end_tooltip()
-                # item_hovered does not work when dragging
+                # imgui.is_item_hovered() does not work when dragging
                 is_hovering = ((io.mouse_pos.x-offset.x>center.x-io_anchors_width/2) and 
                                (io.mouse_pos.x-offset.x<center.x+io_anchors_width/2) and
                                (io.mouse_pos.y-offset.y>center.y-io_anchors_width/2) and
                                (io.mouse_pos.y-offset.y<center.y+io_anchors_width/2))
+                if is_hovering:
+                    io_hovered = parameter
+                    one_parameter_hovered = True
+                    imgui.begin_tooltip()
+                    imgui.text(parameter_name)
+                    imgui.end_tooltip()
                 if is_hovering and imgui.is_mouse_released(0):
                     parameter_link_end = parameter
                 imgui.pop_id()
@@ -565,11 +573,17 @@ def main():
                 parameter = node.outputs[parameter_name]
                 center = node.get_output_slot_pos(parameter)
                 center_with_offset = add(offset, center)
+                if io_hovered == parameter:
+                    io_anchors_width = io_anchors_width_hovered
+                else:
+                    io_anchors_width = io_anchors_width_not_hovered
                 imgui.set_cursor_pos(imgui.Vec2(center.x-io_anchors_width/2, center.y-io_anchors_width/2))
                 imgui.push_id(str(str(node.id) + "output" + parameter.id))
                 if (imgui.invisible_button("output", io_anchors_width, io_anchors_width)):
                     selected_parameter = parameter
                 if imgui.is_item_hovered():
+                    io_hovered = parameter
+                    one_parameter_hovered = True
                     imgui.begin_tooltip()
                     imgui.text(parameter_name)
                     imgui.end_tooltip()
@@ -585,6 +599,9 @@ def main():
 
             imgui.pop_id()
         draw_list.channels_merge()
+        if not one_parameter_hovered:
+            io_hovered = None
+
 
         debug_is_mouse_dragging = imgui.is_mouse_dragging(0)
         if parameter_link_start and parameter_link_end:
