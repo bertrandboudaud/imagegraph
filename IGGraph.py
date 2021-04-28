@@ -39,7 +39,6 @@ class IGGraph:
         return self.state
 
     def from_json(self, json):
-        print("todo")
         json_nodes = json["nodes"]
         for json_node in json_nodes:
             node = self.node_library.create_node(json_node["name"])

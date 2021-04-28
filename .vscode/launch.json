@@ -7,6 +7,35 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Test client",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["c:\\tmp\\graph.json",
+                     "--",
+                     "--number_of_vertical_cells.value","42",
+                     "--number_of_horizontal_cells.value","20"]
+        },
+        {
+            "name": "Test client help",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--help"]
+        },
+        {
+            "name": "Test client help help",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["c:\\tmp\\graph.json",
+                "--",
+                "--help"]
         }
     ]
 }
