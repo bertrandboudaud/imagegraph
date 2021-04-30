@@ -13,6 +13,9 @@ class IGParameterColor(IGParameter):
     def color256(self):
         return [self.r*255 , self.g*255, self.b*255, self.a*255]
 
+    def color256_tuple(self):
+        return (int(self.r*255) , int(self.g*255), int(self.b*255), int(self.a*255))
+
     @property
     def r(self):
         return self._value["r"]
