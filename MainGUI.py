@@ -186,7 +186,7 @@ def display_parameter(parameter, editable):
             imgui.text("Right: " + str(parameter.right))
             imgui.text("Bottom: " + str(parameter.bottom))
     elif parameter.type == "Coordinates":
-        if editbale:
+        if editable:
             changed, value = imgui.input_float("x", parameter.x)
             if changed:
                 parameter.x = value
