@@ -42,7 +42,6 @@ def main():
             graph_args_parser.add_argument(option_name, nargs='?', help='')
             inputs[parameter_name_with_field] = {"field": field, "value" : input_node.inputs["default value"].get_value() }
     graph_args = graph_args_parser.parse_args(graph_args)
-
     for parameter in inputs:
         arg_value = graph_args.__getattribute__(parameter)
         if arg_value is not None:
@@ -58,6 +57,17 @@ def main():
 
     # run graph
     iggraph.run()
+
+    # display outputs
+    output_nodes = iggraph.get_output_nodes()
+    for output_node in output_nodes:
+        parameter_name = output_node.inputs["parameter name"].text
+        output_parameter = output_node.outputs["output"]
+        if (output_parameter.type == "Image"): # todo handlers
+            output_parameter.image.show()
+        else:
+            for field in output_parameter.get_value():
+                print(parameter_name + ", " + field + ": " + str(output_parameter.get_value()[field]))
 
 if __name__ == "__main__":
     main()
