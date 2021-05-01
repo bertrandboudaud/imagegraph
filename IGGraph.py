@@ -8,13 +8,13 @@ class IGGraph:
     STATE_IDLE = 1
     STATE_RUNNING = 2
 
-    def __init__(self):
+    def __init__(self, node_library):
         self.nodes = []
         self.links = []
         self.run_nodes = []
         self.error_nodes = {}
         self.id_generator = 1
-        self.node_library = IGLibrary()
+        self.node_library = node_library
         self.timestamp = 1
         self.parameter_run_timestamp = {}
         self.catch_exceptions = True

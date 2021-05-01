@@ -16,10 +16,43 @@ NODE_WINDOW_PADDING = imgui.Vec2(8.0, 8.0)
 previous_key_callback = None
 selected_link = None
 selected_node = None
+node_library = IGLibrary()
 iggraph = None
 debug_is_mouse_dragging = False
 show_debug_window = False
 slider_indexes = {}
+
+params_color_palette = [
+(0.996,0.231,0.118),
+(0.98,0.185,0.477),
+(0.982,0.624,0.855),
+(0.599,0.186,0.487),
+(0.312,0.009,0.923),
+(0.177,0.413,0.795),
+(0.003,0.649,0.933),
+(0.435,0.919,0.999),
+(0.032,0.636,0.605),
+(0.035,0.991,0.798),
+(0.633,0.175,0.196),
+(0.167,0.401,0.415),
+(0.29,0.286,0.343),
+(0.555,0.483,0.644),
+(0.717,0.753,0.998),
+(0.674,0.744,0.612),
+(0.509,0.488,0.44),
+(0.352,0.233,0.11),
+(0.682,0.396,0.028),
+(0.968,0.664,0.19),
+(0.84,0.626,0.564),
+(0.955,0.915,0.36),
+(0.606,0.584,0.004),
+(0.339,0.384,0.017),
+(0.901,0.111,0.968),
+(0.07,0.588,0.231),
+(0.317,0.88,0.076),
+]
+params_color_palette_index = 0
+params_color = {}
 
 class ImageToTexture:
     def __init__(self):
@@ -104,22 +137,19 @@ def draw_link(draw_list, p1_x, p1_y, p2_x, p2_y, parameter, hovered):
         thickness = 3
     draw_list.add_line(p1_x, p1_y, p2_x, p2_y,  get_parameter_color(parameter), thickness)
 
+def assign_parameter_colors(node_library):
+    global params_color
+    global params_color_palette
+    global params_color_palette_index
+    for parameters_name in node_library.parameters:
+        col = params_color_palette[params_color_palette_index]
+        imgui_col = imgui.get_color_u32_rgba(col[0], col[1], col[2], 0.7)
+        params_color[node_library.parameters[parameters_name].get().type] = imgui_col
+        params_color_palette_index = params_color_palette_index + 1
+
 def get_parameter_color(parameter):
-    if (parameter.type == "Image"):
-        return imgui.get_color_u32_rgba(1,0,0,0.7)
-    if (parameter.type == "Rectangle"):
-        return imgui.get_color_u32_rgba(0,1,0,0.7)
-    if (parameter.type == "Coordinates"):
-        return imgui.get_color_u32_rgba(0.625,0.32,0.17,0.7)
-    if (parameter.type == "Color"):
-        return imgui.get_color_u32_rgba(1,1,0,0.7)
-    if (parameter.type == "Integer"):
-        return imgui.get_color_u32_rgba(1,1,1,0.7)
-    if (parameter.type == "URL"):
-        return imgui.get_color_u32_rgba(0,1,1,0.7)
-    else:
-        # unknown
-        return imgui.get_color_u32_rgba(1,1,1,0.2)
+    global params_color
+    return params_color[parameter.type]
 
 def get_node_color(node, iggraph, hovered):
     node_color = imgui.get_color_u32_rgba(0,0.5,1,0.5)
@@ -321,6 +351,7 @@ def main():
     global selected_link
     global selected_node
     global iggraph
+    global node_library
     global debug_is_mouse_dragging
     
     global show_debug_window
@@ -329,7 +360,7 @@ def main():
     
     scrolling = imgui.Vec2(0, 0)
 
-    iggraph = IGGraph()
+    iggraph = IGGraph(node_library)
 
     # iggraph.reset()
 
@@ -352,8 +383,9 @@ def main():
     impl = GlfwRenderer(window)
     io = imgui.get_io()
     previous_key_callback = glfw.set_key_callback(window,key_event)
-
     init_textures()
+
+    assign_parameter_colors(node_library)
 
     while not glfw.window_should_close(window):
         glfw.poll_events()
@@ -434,7 +466,7 @@ def main():
 
         imgui.push_style_var(imgui.STYLE_CHILD_BORDERSIZE, 0)
         imgui.begin_child("Library", width_library, 0, True)
-        for node_name in iggraph.node_library.nodes:
+        for node_name in node_library.nodes:
             if imgui.button(node_name):
                 iggraph.create_node(node_name)
         imgui.end_child()
