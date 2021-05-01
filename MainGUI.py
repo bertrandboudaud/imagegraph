@@ -395,6 +395,11 @@ def main():
 
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):
+                clicked_new, selected_new = imgui.menu_item(
+                    "New", 'Cmd+N', False, True
+                )
+                if clicked_new:
+                    iggraph = IGGraph(node_library)
                 clicked_load, selected_load = imgui.menu_item(
                     "Load", 'Cmd+L', False, True
                 )
@@ -468,7 +473,7 @@ def main():
         imgui.push_style_var(imgui.STYLE_CHILD_BORDERSIZE, 0)
         imgui.begin_child("Library", width_library, 0, True)
         for node_name in node_library.nodes:
-            if imgui.button(node_name):
+            if imgui.button(node_name, width_library):
                 iggraph.create_node(node_name)
         imgui.end_child()
         imgui.pop_style_var()
