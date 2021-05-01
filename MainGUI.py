@@ -449,10 +449,11 @@ def main():
                 imgui.end_menu()
             imgui.end_main_menu_bar()
 
-        height_window = io.display_size.y - imgui.get_cursor_pos_y()
+        height_window = io.display_size.y - 18  # imgui.get_cursor_pos_y()
 
         imgui.push_style_var(imgui.STYLE_ITEM_SPACING, imgui.Vec2(0,0))
         imgui.set_next_window_size(io.display_size.x, height_window)
+        imgui.set_next_window_position(0, 18)
         imgui.push_style_var(imgui.STYLE_WINDOW_ROUNDING, 0)
         imgui.begin("Splitter test", False, imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS)
         imgui.pop_style_var()
