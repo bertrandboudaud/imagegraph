@@ -19,6 +19,7 @@ class IGGraph:
         self.parameter_run_timestamp = {}
         self.catch_exceptions = True
         self.state = self.STATE_IDLE
+        self.running_nodes = []
     
     def to_json(self):
         json = {}
@@ -126,10 +127,10 @@ class IGGraph:
         
     def run_one_step(self):
         # print("-- run one step")
-        nodes_to_run = self.find_nodes_to_run()
-        if len(nodes_to_run) == 0:
+        self.running_nodes = self.find_nodes_to_run()
+        if len(self.running_nodes) == 0:
             return False
-        for node in nodes_to_run:
+        for node in self.running_nodes:
             # print("run " + node.name)
             self.set_inputs(node)
             try:
@@ -142,8 +143,11 @@ class IGGraph:
             self.update_timestamps(node)
         return True
 
-    def is_run(self, node):
+    def has_run(self, node):
         return node in self.run_nodes
+
+    def is_running(self, node):
+        return node in self.running_nodes
 
     def is_error(self, node):
         return node in self.error_nodes
@@ -188,6 +192,7 @@ class IGGraph:
         for node in self.nodes:
             node.reset()
         self.run_nodes = []
+        self.running_nodes = []
         self.error_nodes = {}
         self.parameter_run_timestamp = {}
 

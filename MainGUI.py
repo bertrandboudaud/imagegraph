@@ -158,11 +158,16 @@ def get_node_color(node, iggraph, hovered):
             node_color = imgui.get_color_u32_rgba(1,0,0,0.7)
         else:
             node_color = imgui.get_color_u32_rgba(1,0,0,0.5)
-    elif iggraph.is_run(node):
+    elif iggraph.is_running(node):
         if hovered:
             node_color = imgui.get_color_u32_rgba(0,1,0,0.7)
         else:
             node_color = imgui.get_color_u32_rgba(0,1,0,0.5)
+    elif iggraph.has_run(node):
+        if hovered:
+            node_color = imgui.get_color_u32_rgba(0,1,1,0.7)
+        else:
+            node_color = imgui.get_color_u32_rgba(0,1,1,0.5)
     elif hovered:
         node_color = imgui.get_color_u32_rgba(0,0.5,1,0.7)
     return node_color
@@ -392,7 +397,6 @@ def main():
         impl.process_inputs()
 
         imgui.new_frame()
-
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):
                 clicked_new, selected_new = imgui.menu_item(
@@ -482,6 +486,8 @@ def main():
         imgui.button("left_splitter", separator_width, height_window - 20)
         if (imgui.is_item_active()):
             width_library += io.mouse_delta.x
+        if (imgui.is_item_hovered()):
+            imgui.set_mouse_cursor(imgui.MOUSE_CURSOR_RESIZE_EW)
         
         imgui.same_line()
 
@@ -675,7 +681,9 @@ def main():
         imgui.button("right_splitter", separator_width, height_window - 20)
         if (imgui.is_item_active()):
             width_context -= io.mouse_delta.x
-        
+        if (imgui.is_item_hovered()):
+            imgui.set_mouse_cursor(imgui.MOUSE_CURSOR_RESIZE_EW)
+
         # ==============================================================================
         # Context
         # ==============================================================================
