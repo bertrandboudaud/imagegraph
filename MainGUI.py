@@ -175,12 +175,15 @@ def get_node_color(node, iggraph, hovered):
 def display_parameter(parameter, editable):
     global slider_indexes
     if parameter.type == "List":
-        if parameter.id not in slider_indexes:
-            slider_indexes[parameter.id] = 0
-        changed, values = imgui.slider_int("index", slider_indexes[parameter.id], 0, len(parameter.list)-1)
-        if changed:
-            slider_indexes[parameter.id] = values
-        display_parameter(parameter.list[slider_indexes[parameter.id]], editable)
+        if len(parameter.list) == 0:
+            imgui.text("Empty list")
+        else:
+            if parameter.id not in slider_indexes:
+                slider_indexes[parameter.id] = 0
+            changed, values = imgui.slider_int("index", slider_indexes[parameter.id], 0, len(parameter.list)-1)
+            if changed:
+                slider_indexes[parameter.id] = values
+            display_parameter(parameter.list[slider_indexes[parameter.id]], editable)
     if parameter.type == "Image":
         if parameter.image:
             image_to_texture = get_gl_texture(parameter.image, parameter.timestamp)
@@ -546,6 +549,7 @@ def main():
         # Display nodes
         parameter_link_end = None
         one_parameter_hovered = False
+        one_node_moving_active = False
         for node in iggraph.nodes:
             imgui.push_id(str(node.id))
             node_rect_min = add(offset, node.pos)
@@ -625,7 +629,11 @@ def main():
                 imgui.push_id(str(str(node.id) + "output" + parameter.id))
                 if (imgui.invisible_button("output", io_anchors_width, io_anchors_width)):
                     selected_parameter = parameter
-                if imgui.is_item_hovered():
+                is_hovering = ((io.mouse_pos.x-offset.x>center.x-io_anchors_width/2) and 
+                    (io.mouse_pos.x-offset.x<center.x+io_anchors_width/2) and
+                    (io.mouse_pos.y-offset.y>center.y-io_anchors_width/2) and
+                    (io.mouse_pos.y-offset.y<center.y+io_anchors_width/2))
+                if is_hovering:
                     io_hovered = parameter
                     one_parameter_hovered = True
                     imgui.begin_tooltip()
@@ -633,12 +641,14 @@ def main():
                     imgui.end_tooltip()
                 draw_list.add_circle_filled(center_with_offset.x, center_with_offset.y, io_anchors_width/2, get_parameter_color(parameter))
                 imgui.pop_id()
-                if imgui.is_item_active():
+                # cannot use imgui.is_item_active, seems buggy with the scroll
+                if is_hovering and imgui.is_mouse_down(0):
                     parameter_link_start = parameter
 
             if node_widgets_active or node_moving_active:
                 selected_node = node
-            if (node_moving_active and imgui.is_mouse_dragging(0) and node.id==selected_node.id):
+                one_node_moving_active = True
+            if node_moving_active and imgui.is_mouse_dragging(0) and node.id==selected_node.id:
                node.pos = add(node.pos, io.mouse_delta)
 
             imgui.pop_id()
@@ -646,8 +656,10 @@ def main():
         if not one_parameter_hovered:
             io_hovered = None
 
-
         debug_is_mouse_dragging = imgui.is_mouse_dragging(0)
+        if not one_node_moving_active and not parameter_link_start and imgui.is_mouse_dragging(0):
+            scroll_offset = imgui.Vec2(io.mouse_delta.x, io.mouse_delta.y)
+            scrolling = add(scrolling, scroll_offset)
         if parameter_link_start and parameter_link_end:
             iggraph.add_link(parameter_link_start, parameter_link_end)
         elif parameter_link_start and imgui.is_mouse_dragging(0):
@@ -692,6 +704,9 @@ def main():
         imgui.push_style_var(imgui.STYLE_CHILD_BORDERSIZE, 0)
         imgui.begin_child("child3", width_context, 0, True);
         if selected_node:
+            if selected_node.handle_dynamic_parameters():
+                if imgui.button("add parameter"):
+                    selected_node.add_dynamic_parameter()
             if imgui.tree_node("Inputs"):
                 for parameter_name in selected_node.inputs:
                     parameter = selected_node.inputs[parameter_name]
