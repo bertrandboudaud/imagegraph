@@ -126,14 +126,6 @@ class IGNode:
     def on_input_connected_to(self, output_parameter):
         pass
 
-class IGCreateImage(IGNode):
-    def __init__(self, id):
-        super().__init__(id, "Create Image")
-        self.created_image = IGParameterImage("created image", self) 
-        self.outputs.append(self.created_image)
-    
-    def process(self):
-        mode = 'RGBA'
-        size = (128, 128)
-        color = (73, 109, 137)
-        self.created_image.image = Image.new(mode, size, color)
+    def is_scoped_node(self):
+        return False
+

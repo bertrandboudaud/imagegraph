@@ -31,3 +31,6 @@ class IGForEach(IGNode):
             self.outputs["Result1"].set_value(self.inputs["Input1"])
             self.outputs["Result1"].set_ready()
         self.index = self.index + 1
+
+    def is_scoped_node(self):
+        return True

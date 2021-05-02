@@ -63,11 +63,19 @@ class IGGraph:
 
     def find_input_parameter_links(self, input_parameter):
         # find output parameters linked to this input parameter
-        found_parameter = []
+        found_parameters = []
         for link in self.links:
             if input_parameter == link.input_parameter:
-                found_parameter.append(link.output_parameter)
-        return found_parameter
+                found_parameters.append(link.output_parameter)
+        return found_parameters
+
+    def find_output_parameter_links(self, output_parameter):
+        # find inputs parameters linked to this output parameter
+        found_parameters = []
+        for link in self.links:
+            if output_parameter == link.output_parameter:
+                found_parameters.append(link.input_parameter)
+        return found_parameters
 
     def find_nodes_to_run(self):
         found_nodes = []
@@ -124,7 +132,7 @@ class IGGraph:
         while True:
             if not self.run_one_step():
                 break
-        
+    
     def run_one_step(self):
         # print("-- run one step")
         self.running_nodes = self.find_nodes_to_run()
@@ -134,6 +142,8 @@ class IGGraph:
             # print("run " + node.name)
             self.set_inputs(node)
             try:
+                if node.is_scoped_node():
+                    self.reset_scoped_nodes(node)
                 node.process()
             except Exception as e:
                 self.error_nodes[node] = repr(e)
@@ -207,3 +217,28 @@ class IGGraph:
     def prepare_to_run(self):
         for node in self.nodes:
             node.preapre_to_process()
+    
+    def reset_scoped_nodes(self, root_node):
+        # get scoped nodes
+        nodes = [root_node]
+        scoped_nodes = []
+        while len(nodes)>0:
+            nodes_to_add = []
+            for node in nodes:
+                for output_parameter_name in node.outputs:
+                    output_parameter = node.outputs[output_parameter_name]
+                    found_parameters = self.find_output_parameter_links(output_parameter)
+                    for found_parameter in found_parameters:
+                        found_node = found_parameter.owner
+                        if not found_node in scoped_nodes and found_node != root_node:
+                            nodes_to_add.append(found_node)
+            scoped_nodes = scoped_nodes + nodes_to_add
+            nodes = nodes_to_add
+        #reset scoped nodes
+        for node in scoped_nodes:
+            node.reset()
+        
+
+        
+
+
