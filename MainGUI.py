@@ -651,19 +651,28 @@ def main():
             if node_moving_active and imgui.is_mouse_dragging(0) and node.id==selected_node.id:
                node.pos = add(node.pos, io.mouse_delta)
 
+            debug_is_mouse_dragging = imgui.is_mouse_dragging(0)
+
             imgui.pop_id()
         draw_list.channels_merge()
         if not one_parameter_hovered:
             io_hovered = None
 
-        debug_is_mouse_dragging = imgui.is_mouse_dragging(0)
-        if not one_node_moving_active and not parameter_link_start and imgui.is_mouse_dragging(0):
+        # scrolling
+        mouse_is_in_schematic = (io.mouse_pos.x > width_library) and\
+                                (io.mouse_pos.x < (width_library + width_shematic)) and\
+                                (io.mouse_pos.y < height_window) and\
+                                (io.mouse_pos.y > 18)
+        if not one_node_moving_active and not parameter_link_start and imgui.is_mouse_dragging(0) and mouse_is_in_schematic:
             scroll_offset = imgui.Vec2(io.mouse_delta.x, io.mouse_delta.y)
             scrolling = add(scrolling, scroll_offset)
+        # link creation
         if parameter_link_start and parameter_link_end:
             iggraph.add_link(parameter_link_start, parameter_link_end)
+        # creating link
         elif parameter_link_start and imgui.is_mouse_dragging(0):
             draw_link_param_to_point(draw_list, offset, parameter_link_start, io.mouse_pos.x, io.mouse_pos.y, True)
+        # mouse release
         if imgui.is_mouse_released(0):
             parameter_link_start = None
 
@@ -727,7 +736,9 @@ def main():
         # 
         imgui.end()
 
-        #------------------------------------------------------------
+        # ==============================================================================
+        # Debug Window
+        # ==============================================================================
         if show_debug_window:
             debug_window_expanded, show_debug_window = imgui.begin("Debug", True)
             if parameter_link_start:
@@ -739,7 +750,7 @@ def main():
             else:
                 imgui.text("selected_parameter: " + "None")
             imgui.text("is_mouse_dragging: " + str(debug_is_mouse_dragging))
-            imgui.text("mouse.x: " + str(io.mouse_pos.x))
+            imgui.text("mouse: (" + str(io.mouse_pos.x) + ", " + str(io.mouse_pos.y) + ")")
             imgui.end()
 
         gl.glClearColor(1., 1., 1., 1)
