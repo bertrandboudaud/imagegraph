@@ -2,7 +2,6 @@ import imgui # TODO remove this dependency
 from IGParameter import *
 from PIL import ImageFilter
 from PIL import ImageOps
-from IGLibrary import *
 class NodeLink:
     def __init__(self, output_parameter, input_parameter):
         self.input_parameter = input_parameter

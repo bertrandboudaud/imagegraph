@@ -10,6 +10,7 @@ from PIL import ImageOps
 import numpy
 from IGNode import *
 from IGGraph import *
+from IGLibrary import *
 import json
 
 NODE_WINDOW_PADDING = imgui.Vec2(8.0, 8.0)

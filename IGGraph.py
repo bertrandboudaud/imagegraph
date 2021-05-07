@@ -1,7 +1,5 @@
 import imgui # TODO remove this dependency
-from IGLibrary import *
 from IGNode import *
-from enum import Enum
 
 class IGGraph:
 
