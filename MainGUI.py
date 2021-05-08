@@ -71,6 +71,10 @@ def add(vect1, vect2):
     res = imgui.Vec2(vect1.x + vect2.x, vect1.y + vect2.y)
     return res
 
+def sub(vect1, vect2):
+    res = imgui.Vec2(vect1.x - vect2.x, vect1.y - vect2.y)
+    return res
+
 def get_gl_texture(image, timestamp):
     global image_to_texture_last_used
     image_to_texture_last_used = image_to_texture_last_used + 1
@@ -380,6 +384,8 @@ def main():
     io_hovered = None 
     io_anchors_width_not_hovered = 10
     io_anchors_width_hovered = 15 
+    right_splitter_is_active = False
+    left_splitter_is_active = False
     
     image_width = 0
     image_height = 0
@@ -488,8 +494,10 @@ def main():
 
         imgui.same_line()
         imgui.button("left_splitter", separator_width, height_window - 20)
-        if (imgui.is_item_active()):
+        left_splitter_is_active = imgui.is_item_active()
+        if (left_splitter_is_active):
             width_library += io.mouse_delta.x
+            scrolling = imgui.Vec2(scrolling.x - io.mouse_delta.x, scrolling.y)
         if (imgui.is_item_hovered()):
             imgui.set_mouse_cursor(imgui.MOUSE_CURSOR_RESIZE_EW)
         
@@ -664,7 +672,12 @@ def main():
                                 (io.mouse_pos.x < (width_library + width_shematic)) and\
                                 (io.mouse_pos.y < height_window) and\
                                 (io.mouse_pos.y > 18)
-        if not one_node_moving_active and not parameter_link_start and imgui.is_mouse_dragging(0) and mouse_is_in_schematic:
+        if not one_node_moving_active and\
+           not parameter_link_start and\
+           imgui.is_mouse_dragging(0) and\
+           mouse_is_in_schematic and\
+           not left_splitter_is_active and\
+           not right_splitter_is_active:
             scroll_offset = imgui.Vec2(io.mouse_delta.x, io.mouse_delta.y)
             scrolling = add(scrolling, scroll_offset)
         # link creation
@@ -701,7 +714,8 @@ def main():
 
         imgui.same_line()
         imgui.button("right_splitter", separator_width, height_window - 20)
-        if (imgui.is_item_active()):
+        right_splitter_is_active = imgui.is_item_active()
+        if (right_splitter_is_active):
             width_context -= io.mouse_delta.x
         if (imgui.is_item_hovered()):
             imgui.set_mouse_cursor(imgui.MOUSE_CURSOR_RESIZE_EW)
