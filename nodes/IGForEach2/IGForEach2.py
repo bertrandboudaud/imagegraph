@@ -52,8 +52,11 @@ class IGForEach2(IGNode):
         self.input_to_output[param_name] = self.outputs[param_name]
         self.input_to_result[param_name] = self.outputs[result_name]
 
-    def on_input_connected_to(self, input_parameter, output_parameter):
+    def on_input_connected_to(self, input_parameter, other_node_output_parameter):
         name = input_parameter.id
-        self.outputs[name].mute_to(output_parameter)
-        name = "result"+name.split("param")[1]
-        self.outputs[name].mute_to(output_parameter)
+        if (name != "List to iterate"):
+            self.inputs[name].mute_to(other_node_output_parameter)
+            name_result = "result"+name.split("param")[1]
+            self.outputs[name_result].mute_to(other_node_output_parameter)
+            name_param = "param"+name.split("param")[1]
+            self.outputs[name_param].mute_to(other_node_output_parameter)

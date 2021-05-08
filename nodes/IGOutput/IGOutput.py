@@ -16,9 +16,9 @@ class IGOutput(IGNode):
         self.outputs["output"].set_value(self.inputs["output"])
         self.set_all_outputs_ready()
     
-    def on_input_connected_to(self, input_parameter, other_parameter):
-        self.outputs["output"].mute_to(other_parameter)
+    def on_input_connected_to(self, input_parameter, other_node_output_parameter):
+        self.outputs["output"].mute_to(other_node_output_parameter)
         if self.inputs["parameter name"].text == "":
-            self.inputs["parameter name"].text = other_parameter.id
+            self.inputs["parameter name"].text = other_node_output_parameter.id
         
 

@@ -11,18 +11,25 @@ class IGParameterMutable(IGParameter):
         self.user_parameter_json = None
 
     def on_connected_to(self, other_parameter):
-        self.mute_to(other_parameter)
+        if self.user_parameter == None:
+            self.mute_to(other_parameter)
 
     # TODO: disconnection
     # - unmute
     # - remove user_parameter_json
 
     def mute_to(self, other_parameter):
-        self.user_parameter = copy.copy(other_parameter)
+        if ("user_parameter" in other_parameter.__dict__):
+            self.user_parameter = copy.copy(other_parameter.user_parameter)
+        else:
+            self.user_parameter = copy.copy(other_parameter)
         if self.user_parameter_json:
             self.__dict__['user_parameter'] = self.__dict__['user_parameter'].from_json(self.__dict__['user_parameter_json'])
         else:
-            self.set_value(other_parameter)
+            if ("user_parameter" in other_parameter.__dict__):
+                self.set_value(other_parameter.user_parameter)
+            else:
+                self.set_value(other_parameter)
 
     def get_value(self):
         if self.user_parameter:

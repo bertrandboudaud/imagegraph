@@ -207,7 +207,7 @@ class IGGraph:
     def add_link(self, output_parameter, input_parameter):
         # TODO remove notification on parameter. go through the node to be notified only
         output_parameter.on_connected_to(input_parameter)
-        output_parameter.owner.on_output_connected_to(input_parameter, output_parameter)
+        output_parameter.owner.on_output_connected_to(output_parameter, input_parameter)
         input_parameter.on_connected_to(output_parameter)
         input_parameter.owner.on_input_connected_to(input_parameter, output_parameter)
         self.links.append(NodeLink(output_parameter, input_parameter))

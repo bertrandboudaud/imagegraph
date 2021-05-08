@@ -119,10 +119,10 @@ class IGNode:
             parameter.restore_backup_value()
             parameter.is_ready = False
 
-    def on_output_connected_to(self, input_parameter, output_parameter):
+    def on_output_connected_to(self, output_parameter, other_node_input_parameter):
         pass
 
-    def on_input_connected_to(self, input_parameter, output_parameter):
+    def on_input_connected_to(self, input_parameter, other_node_output_parameter):
         pass
 
     def is_scoped_node(self):
