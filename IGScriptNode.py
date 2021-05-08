@@ -17,5 +17,9 @@ class IGScriptNode(IGNode):
                                      library.create_parameter(output_node.outputs["output"].type)) 
 
     def process(self):
+        for input_node in self.iggraph.get_input_nodes():
+            input_node.inputs["default value"].set_value(self.inputs[input_node.inputs["parameter name"].text]) 
         self.iggraph.run()
+        for output_node in self.iggraph.get_output_nodes():
+            self.outputs[output_node.inputs["parameter name"].text].set_value(output_node.outputs["output"]) 
         self.set_all_outputs_ready()
