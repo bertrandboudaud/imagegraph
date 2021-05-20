@@ -319,7 +319,7 @@ def example_mosaic(iggraph):
     iggraph.links.append(NodeLink(node_draw_image.outputs["composed image"], node_for_each.inputs["Input1"]))
 
 def show_outputs_popup(iggraph):
-    if imgui.begin_popup("Outputs", 0):
+    if imgui.begin_popup_modal("Outputs")[0]:
         output_nodes = iggraph.get_output_nodes()
         for output_node in output_nodes:
             value = output_node.outputs["output"]
@@ -333,7 +333,7 @@ def show_outputs_popup(iggraph):
 
 def show_inputs_popup(iggraph):
     show_result = False
-    if imgui.begin_popup("User Input", 0):
+    if imgui.begin_popup_modal("User Input")[0]:
         input_nodes = iggraph.get_input_nodes()
         for input_node in input_nodes:
             default_value = input_node.inputs["default value"]
@@ -677,7 +677,8 @@ def main():
            imgui.is_mouse_dragging(0) and\
            mouse_is_in_schematic and\
            not left_splitter_is_active and\
-           not right_splitter_is_active:
+           not right_splitter_is_active and\
+           imgui.is_window_focused():
             scroll_offset = imgui.Vec2(io.mouse_delta.x, io.mouse_delta.y)
             scrolling = add(scrolling, scroll_offset)
         # link creation
