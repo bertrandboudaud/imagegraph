@@ -322,8 +322,8 @@ def show_outputs_popup(iggraph):
     if imgui.begin_popup_modal("Outputs")[0]:
         output_nodes = iggraph.get_output_nodes()
         for output_node in output_nodes:
-            value = output_node.outputs["output"]
             if imgui.tree_node(output_node.inputs["parameter name"].text):
+                value = output_node.outputs["output"]
                 display_parameter(value,True)
                 imgui.tree_pop()
         imgui.separator()
@@ -336,8 +336,8 @@ def show_inputs_popup(iggraph):
     if imgui.begin_popup_modal("User Input")[0]:
         input_nodes = iggraph.get_input_nodes()
         for input_node in input_nodes:
-            default_value = input_node.inputs["default value"]
             if imgui.tree_node(input_node.inputs["parameter name"].text):
+                default_value = input_node.inputs["default value"]
                 display_parameter(default_value,True)
                 imgui.tree_pop()
         imgui.separator()

@@ -2,6 +2,7 @@ import math
 import numpy
 from IGNode import *
 from IGGraph import *
+from IGLibrary import *
 import json
 import argparse
 import sys as _sys
@@ -25,7 +26,8 @@ def main():
     main_args = main_args_parser.parse_args(main_args)
 
     # load graph
-    iggraph = IGGraph()
+    node_library = IGLibrary()
+    iggraph = IGGraph(node_library)
     f=open(main_args.graph[0])
     iggraph.from_json(json.load(f))
     f.close()
