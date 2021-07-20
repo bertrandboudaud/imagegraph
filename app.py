@@ -3,6 +3,11 @@ app = Flask(__name__)
 import sys
 from os.path import dirname
 import json
+import jsonify
+from flask_cors import CORS
+
+# enable CORS
+CORS(app, resources={r'/*': {'origins': '*'}})
 
 sys.path.append(dirname(__file__) + "/..")
 
