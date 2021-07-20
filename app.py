@@ -1,9 +1,8 @@
-from flask import Flask
+from flask import Flask, jsonify
 app = Flask(__name__)
 import sys
 from os.path import dirname
 import json
-import jsonify
 from flask_cors import CORS
 
 # enable CORS
@@ -33,7 +32,10 @@ def load_graph(graph_name):
     for input_node in input_nodes:
          key = input_node.inputs["parameter name"].text
          response[key] = input_node.to_json()
-    return response
+    return  jsonify({
+        'status': 'success',
+        'inputs': response
+    })
 
 if __name__ == '__main__':
     app.run(debug="True")
