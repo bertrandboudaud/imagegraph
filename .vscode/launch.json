@@ -9,10 +9,18 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Test client",
+            "name": "MainGUI",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "MainGUI.py",
+            "console": "integratedTerminal",
+            "args": []
+        },
+        {
+            "name": "Test CLI",
+            "type": "python",
+            "request": "launch",
+            "program": "CLI.py",
             "console": "integratedTerminal",
             "args": ["c:\\tmp\\graph.json",
                      "--",
@@ -20,10 +28,10 @@
                      "--number_of_horizontal_cells.value","5"]
         },
         {
-            "name": "Test client help",
+            "name": "Test CLI help",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "CLI.py",
             "console": "integratedTerminal",
             "args": ["--help"]
         },

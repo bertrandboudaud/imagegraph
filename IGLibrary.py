@@ -25,12 +25,13 @@ class IGLibrary:
         # scripts nodes
         script_dirs = ["c:\\tmp\\lib"]
         for script_dir in script_dirs:
-            for file in os.listdir(script_dir):
-                if file.endswith(".json"):
-                    # todo check content
-                    node_name = os.path.splitext(file)[0]
-                    self.script_nodes[node_name] = os.path.join(script_dir, file)
-                    self.nodes.append(node_name)
+            if os.path.exists(script_dir) and os.path.isdir(script_dir):
+                for file in os.listdir(script_dir):
+                    if file.endswith(".json"):
+                        # todo check content
+                        node_name = os.path.splitext(file)[0]
+                        self.script_nodes[node_name] = os.path.join(script_dir, file)
+                        self.nodes.append(node_name)
    
     def create_node(self, node_name):
         if node_name in self.script_nodes:
