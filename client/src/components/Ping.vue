@@ -6,8 +6,8 @@
         <hr>
         <br>
         <b-form @submit="onSubmit" @reset="onReset">
-          <b-form-group v-for="(input, index) in inputs" 
-                    :key="index" 
+          <b-form-group v-for="(input, index) in inputs"
+                    :key="index"
                     id="form-title-group"
                     :label="input.inputs['parameter name'].value.text"
                     label-for="form-title-input">
@@ -52,6 +52,7 @@
 <script>
 import axios from 'axios';
 import Integer from '@/components/Integer.vue';
+import Color from '@/components/Color.vue';
 
 export default {
   data() {
@@ -84,7 +85,11 @@ export default {
       console.log(param);
       switch (param.user_parameter.type) {
         case 'Integer':
-            return Integer;
+          console.log(param.user_parameter);
+          return Integer;
+        case 'Color':
+          console.log(param.user_parameter);
+          return Color;
         default:
           return 'Integer';
       }
