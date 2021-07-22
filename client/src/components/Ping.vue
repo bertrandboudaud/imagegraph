@@ -5,26 +5,15 @@
         <h1>Test</h1>
         <hr>
         <br>
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th scope="col">Input name</th>
-              <th scope="col">Value</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(input, index) in inputs" :key="index">
-              <td>{{ input.inputs["parameter name"].value.text }}</td>
-              <!--<td>{{ input.inputs["default value"].user_parameter.value.value }}</td>-->
-              <td>{{ displayParameter(input.inputs["default value"]) }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <br>
-        <button type="button" class="btn btn-success btn-sm">Lanch workflow</button>
-        <br>
         <b-form @submit="onSubmit" @reset="onReset">
+          <b-form-group v-for="(input, index) in inputs" 
+                    :key="index" 
+                    id="form-title-group"
+                    :label="input.inputs['parameter name'].value.text"
+                    label-for="form-title-input">
+                    <component :is="displayParameter(input.inputs['default value'])">
+                    </component>
+          </b-form-group>
           <b-form-group id="form-title-group"
                     label="Title:"
                     label-for="form-title-input">
@@ -62,6 +51,7 @@
 
 <script>
 import axios from 'axios';
+import Integer from '@/components/Integer.vue';
 
 export default {
   data() {
@@ -73,6 +63,9 @@ export default {
         read: [],
       },
     };
+  },
+  components: {
+    Integer,
   },
   methods: {
     getInputs() {
@@ -91,9 +84,9 @@ export default {
       console.log(param);
       switch (param.user_parameter.type) {
         case 'Integer':
-          return 'integer';
+            return Integer;
         default:
-          return 'prout';
+          return 'Integer';
       }
     },
     addBook(payload) {
