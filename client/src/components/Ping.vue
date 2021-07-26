@@ -38,7 +38,7 @@ export default {
         author: '',
         read: [],
       },
-      params: [],
+      paramComponents: [],
     };
   },
   components: {
@@ -73,7 +73,7 @@ export default {
           paramComponent = 'Integer';
           break;
       }
-      this.params[param.user_parameter.id] = paramComponent;
+      this.paramComponents[param.user_parameter.id] = paramComponent;
       return paramComponent;
     },
     executeWorkflow(payload) {
@@ -89,13 +89,15 @@ export default {
         });
     },
     initForm() {
-      this.params = [];
+      this.paramComponents = [];
     },
     onSubmit(evt) {
       evt.preventDefault();
-      const payload = {
-        params: this.params,
-      };
+      const payload = {};
+      this.paramComponents.forEach((key, paramComponent) => {
+        payload[key] = paramComponent.getValue();
+      });
+      console.log(payload);
       this.executeWorkflow(payload);
       this.initForm();
     },

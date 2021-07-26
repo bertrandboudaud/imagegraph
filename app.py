@@ -39,17 +39,20 @@ def load_graph(graph_name):
             'inputs': response
         })
     if request.method == 'POST':
+        input_nodes = iggraph.get_input_nodes()
+        inputs = {}
+        for input_node in input_nodes:
+            parameter_name = input_node.inputs["parameter name"]
+            inputs[parameter_name] = input_node.inputs["default value"].get_value()
+        for parameter in request.data:
+            print(str(parameter))
+            # todo asssign each field to inputs
         response = {}
-#        for input_node in input_nodes:
-#            key = input_node.inputs["parameter name"].text
-#            response[key] = input_node.to_json()
         response['toto'] = 42
         return  jsonify({
             'status': 'success',
             'inputs': response
-        })
-
-        
+        })        
 
 if __name__ == '__main__':
     app.run(debug="True")
