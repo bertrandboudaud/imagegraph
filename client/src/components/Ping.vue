@@ -38,7 +38,7 @@ export default {
         author: '',
         read: [],
       },
-      paramComponents: [],
+      paramComponents: {},
     };
   },
   components: {
@@ -74,6 +74,7 @@ export default {
           break;
       }
       this.paramComponents[param.user_parameter.id] = paramComponent;
+      paramComponent.test_to_remove = 42;
       return paramComponent;
     },
     executeWorkflow(payload) {
@@ -89,14 +90,19 @@ export default {
         });
     },
     initForm() {
-      this.paramComponents = [];
+      this.paramComponents = {};
     },
     onSubmit(evt) {
       evt.preventDefault();
       const payload = {};
-      this.paramComponents.forEach((key, paramComponent) => {
+      console.log('----------');
+      console.log(this.paramComponents);
+      Object.keys(this.paramComponents).forEach((key) => {
+        const paramComponent = this.paramComponents[key];
+        console.log(paramComponent);
         payload[key] = paramComponent.getValue();
       });
+      console.log('----------');
       console.log(payload);
       this.executeWorkflow(payload);
       this.initForm();
