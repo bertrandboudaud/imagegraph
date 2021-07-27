@@ -8,16 +8,19 @@
         <b-form @submit="onSubmit" @reset="onReset">
           <b-form-group v-for="(input, index) in inputs"
                     :key="index"
-                    id="form-title-group"
-                    :label="input.inputs['parameter name'].value.text"
+                    :id="index"
+                    :label="index"
                     label-for="form-title-input">
-                    <component :is="displayParameter(input.inputs['default value'])">
+                    <component :is="displayParameter(input.inputs['default value'])"
+                               :default_value="input.inputs['default value']"
+                               :parameter_id="index"
+                               :ref="index">
                     </component>
           </b-form-group>
-        <b-button-group>
-          <b-button type="submit" variant="primary">Submit</b-button>
-          <b-button type="reset" variant="danger">Reset</b-button>
-        </b-button-group>
+          <b-button-group>
+            <b-button type="submit" variant="primary">Submit</b-button>
+            <b-button type="reset" variant="danger">Reset</b-button>
+          </b-button-group>
       </b-form>
       </div>
     </div>
@@ -98,11 +101,9 @@ export default {
       console.log('----------');
       console.log(this.paramComponents);
       Object.keys(this.paramComponents).forEach((key) => {
-        const paramComponent = this.paramComponents[key];
-        console.log(paramComponent);
+        const paramComponent = this.$refs[key][0];
         payload[key] = paramComponent.getValue();
       });
-      console.log('----------');
       console.log(payload);
       this.executeWorkflow(payload);
       this.initForm();
