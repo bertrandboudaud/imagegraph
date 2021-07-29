@@ -42,11 +42,33 @@ def load_graph(graph_name):
         input_nodes = iggraph.get_input_nodes()
         inputs = {}
         for input_node in input_nodes:
-            parameter_name = input_node.inputs["parameter name"]
+            parameter_name = input_node.inputs["parameter name"].text
             inputs[parameter_name] = input_node.inputs["default value"].get_value()
-        for parameter in request.data:
-            print(str(parameter))
-            # todo asssign each field to inputs
+        post_data = request.get_json()
+        print(str(post_data))
+        for parameter_name in post_data:
+            arg_value = post_data[parameter_name]
+            if isinstance(inputs[parameter_name]["value"], int):
+                inputs[parameter_name]["value"] = int(arg_value)
+            elif isinstance(inputs[parameter_name]["value"], float):
+                inputs[parameter_name]["value"] = float(arg_value)
+            else:
+                inputs[parameter_name]["value"] = arg_value
+
+        # run graph
+        iggraph.run()
+
+        # display outputs
+        output_nodes = iggraph.get_output_nodes()
+        for output_node in output_nodes:
+            parameter_name = output_node.inputs["parameter name"].text
+            output_parameter = output_node.outputs["output"]
+            #if (output_parameter.type == "Image"): # todo handlers
+            #    output_parameter.image.show()
+            #else:
+            for field in output_parameter.get_value():
+                print(parameter_name + ", " + field + ": " + str(output_parameter.get_value()[field]))
+
         response = {}
         response['toto'] = 42
         return  jsonify({
