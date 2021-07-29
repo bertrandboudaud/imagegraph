@@ -59,18 +59,15 @@ def load_graph(graph_name):
         iggraph.run()
 
         # display outputs
+        response = {}
         output_nodes = iggraph.get_output_nodes()
         for output_node in output_nodes:
             parameter_name = output_node.inputs["parameter name"].text
             output_parameter = output_node.outputs["output"]
-            #if (output_parameter.type == "Image"): # todo handlers
-            #    output_parameter.image.show()
-            #else:
+            response[parameter_name] = {}
             for field in output_parameter.get_value():
-                print(parameter_name + ", " + field + ": " + str(output_parameter.get_value()[field]))
+                response[parameter_name][field] = str(output_parameter.get_value()[field])
 
-        response = {}
-        response['toto'] = 42
         return  jsonify({
             'status': 'success',
             'inputs': response
