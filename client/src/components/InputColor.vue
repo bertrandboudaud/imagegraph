@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: 'Color',
+  name: 'InputColor',
   data() {
     return { };
   },

@@ -2,9 +2,8 @@
   <div class="container">
     <div class="row">
       <div class="col-sm-10">
-        <h1>Test</h1>
+        <h2>Inputs</h2>
         <hr>
-        <br>
         <b-form @submit="onSubmit" @reset="onReset">
           <b-form-group v-for="(input, index) in inputs"
                     :key="index"
@@ -29,23 +28,19 @@
 
 <script>
 import axios from 'axios';
-import Integer from '@/components/Integer.vue';
-import Color from '@/components/Color.vue';
+import InputInteger from '@/components/InputInteger.vue';
+import InputColor from '@/components/InputColor.vue';
 
 export default {
+  name: 'Inputs',
   data() {
     return {
       inputs: [],
-      addBookForm: {
-        title: '',
-        author: '',
-        read: [],
-      },
       paramComponents: {},
     };
   },
   components: {
-    Integer,
+    InputInteger,
   },
   methods: {
     getInputs() {
@@ -66,14 +61,14 @@ export default {
       switch (param.user_parameter.type) {
         case 'Integer':
           console.log(param.user_parameter);
-          paramComponent = Integer;
+          paramComponent = InputInteger;
           break;
         case 'Color':
           console.log(param.user_parameter);
-          paramComponent = Color;
+          paramComponent = InputColor;
           break;
         default:
-          paramComponent = 'Integer';
+          paramComponent = 'InputInteger';
           break;
       }
       this.paramComponents[param.user_parameter.id] = paramComponent;

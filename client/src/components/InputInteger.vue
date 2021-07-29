@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  name: 'Integer',
+  name: 'InputInteger',
   props: ['parameter_id', 'default_value'],
   data() {
     return {
