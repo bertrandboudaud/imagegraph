@@ -6,8 +6,8 @@
         <hr>
           <component v-for="(output, index) in outputs"
                       :key="index"
-                      :is="displayParameter(output.inputs['default value'])"
-                      :default_value="input.inputs['default value']"
+                      :is="displayParameter(output)"
+                      :value="output"
                       :parameter_id="index"
                       :ref="index">
           </component>
@@ -18,38 +18,38 @@
 
 <script>
 import axios from 'axios';
-import InputInteger from '@/components/InputInteger.vue';
-import InputColor from '@/components/InputColor.vue';
+import OutputCoordinates from '@/components/OutputCoordinates.vue';
+import OutputUnknown from '@/components/OutputUnknown.vue';
 
 export default {
+  name: 'Outputs',
   data() {
     return {
-      outputs: [],
       paramComponents: {},
     };
   },
+  props:
+  {
+    outputs: [],
+  },
   components: {
-    InputInteger,
+    OutputCoordinates,
+    OutputUnknown,
   },
   methods: {
     displayParameter(param) {
-      let paramComponent; // TODO unknown
+      let paramComponent;
+      console.log('---------------');
       console.log(param);
       switch (param.user_parameter.type) {
-        case 'Integer':
-          console.log(param.user_parameter);
-          paramComponent = InputInteger;
-          break;
-        case 'Color':
-          console.log(param.user_parameter);
-          paramComponent = InputColor;
+        case 'Coordinates':
+          paramComponent = OutputCoordinates;
           break;
         default:
-          paramComponent = 'InputInteger';
+          paramComponent = OutputUnknown;
           break;
       }
       this.paramComponents[param.user_parameter.id] = paramComponent;
-      paramComponent.test_to_remove = 42;
       return paramComponent;
     },
     executeWorkflow(payload) {

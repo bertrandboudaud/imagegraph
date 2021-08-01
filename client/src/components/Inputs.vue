@@ -72,7 +72,6 @@ export default {
           break;
       }
       this.paramComponents[param.user_parameter.id] = paramComponent;
-      paramComponent.test_to_remove = 42;
       return paramComponent;
     },
     executeWorkflow(payload) {

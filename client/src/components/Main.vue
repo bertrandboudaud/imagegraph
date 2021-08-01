@@ -4,7 +4,7 @@
       <div class="col-sm-10">
         <h1>Test</h1>
           <Inputs v-on:workflowEnd="workflowEnd"/>
-          <Outputs v-if="hasOutputs()"/>
+          <Outputs v-if="hasOutputs()" :outputs="outputs"/>
       </div>
     </div>
   </div>
