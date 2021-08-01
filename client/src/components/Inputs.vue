@@ -78,13 +78,12 @@ export default {
     executeWorkflow(payload) {
       const path = 'http://localhost:5000/test_create';
       axios.post(path, payload)
-        .then(() => {
-          // this.getBooks();
+        .then((response) => {
+          console.log(response);
+          this.$emit('workflowEnd', response);
         })
         .catch((error) => {
-          // eslint-disable-next-line
           console.log(error);
-          // this.getBooks();
         });
     },
     initForm() {
@@ -93,13 +92,10 @@ export default {
     onSubmit(evt) {
       evt.preventDefault();
       const payload = {};
-      console.log('----------');
-      console.log(this.paramComponents);
       Object.keys(this.paramComponents).forEach((key) => {
         const paramComponent = this.$refs[key][0];
         payload[key] = paramComponent.getValue();
       });
-      console.log(payload);
       this.executeWorkflow(payload);
       this.initForm();
     },

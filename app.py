@@ -65,12 +65,13 @@ def load_graph(graph_name):
             parameter_name = output_node.inputs["parameter name"].text
             output_parameter = output_node.outputs["output"]
             response[parameter_name] = {}
-            for field in output_parameter.get_value():
-                response[parameter_name][field] = str(output_parameter.get_value()[field])
+#            for field in output_parameter.get_value():
+                # response[parameter_name][field] = str(output_parameter.get_value()[field])
+            response[parameter_name] = output_parameter.to_json()
 
         return  jsonify({
             'status': 'success',
-            'inputs': response
+            'outputs': response
         })        
 
 if __name__ == '__main__':
