@@ -20,12 +20,9 @@ export default {
   },
   methods: {
     workflowEnd(payload) {
-      console.log(payload);
-      this.outputs = payload.outputs;
+      this.outputs = payload.data.outputs;
     },
     hasOutputs() {
-      console.log('===============');
-      console.log(Object.keys(this.outputs).length);
       return (Object.keys(this.outputs).length > 0);
     },
   },
