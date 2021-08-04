@@ -27,11 +27,14 @@ class IGParameter:
     def get_value(self):
         return self._value
 
-    def to_json(self):
+    def to_json(self, running_parameter = False):
         json = {}
         json["id"]=self.id
         json["type"]=self.type
-        json["value"] = self._backup_value
+        if running_parameter:
+            json["value"] = self._value
+        else:
+            json["value"] = self._backup_value
         return json
 
     def from_json(self, json):

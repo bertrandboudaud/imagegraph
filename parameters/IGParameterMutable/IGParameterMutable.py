@@ -66,11 +66,11 @@ class IGParameterMutable(IGParameter):
         else:
             self.__dict__[name] = value
 
-    def to_json(self):
+    def to_json(self, running_parameter = False):
         json = {}
         json["id"] = self.__dict__['id']
         json["type"] = self.__dict__['_type']
-        json["user_parameter"] = self.__dict__['user_parameter'].to_json()
+        json["user_parameter"] = self.__dict__['user_parameter'].to_json(running_parameter)
         return json
 
     def from_json(self, json):
