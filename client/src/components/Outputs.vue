@@ -2,8 +2,8 @@
   <div class="container">
     <div class="row">
       <div class="col-sm-10">
-        <h2>Outputs</h2>
         <hr>
+        <h2>Outputs</h2>
           <component v-for="(output, index) in outputs"
                       :key="index"
                       :is="displayParameter(output)"
@@ -19,6 +19,7 @@
 <script>
 import axios from 'axios';
 import OutputCoordinates from '@/components/OutputCoordinates.vue';
+import OutputImage from '@/components/OutputImage.vue';
 import OutputUnknown from '@/components/OutputUnknown.vue';
 
 export default {
@@ -34,6 +35,7 @@ export default {
   },
   components: {
     OutputCoordinates,
+    OutputImage,
     OutputUnknown,
   },
   methods: {
@@ -44,6 +46,9 @@ export default {
       switch (param.user_parameter.type) {
         case 'Coordinates':
           paramComponent = OutputCoordinates;
+          break;
+        case 'Image':
+          paramComponent = OutputImage;
           break;
         default:
           paramComponent = OutputUnknown;

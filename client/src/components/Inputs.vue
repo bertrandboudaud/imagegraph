@@ -2,8 +2,8 @@
   <div class="container">
     <div class="row">
       <div class="col-sm-10">
-        <h2>Inputs</h2>
         <hr>
+        <h2>Inputs</h2>
         <b-form @submit="onSubmit" @reset="onReset">
           <b-form-group v-for="(input, index) in inputs"
                     :key="index"
@@ -44,7 +44,7 @@ export default {
   },
   methods: {
     getInputs() {
-      const path = 'http://localhost:5000/test_create';
+      const path = 'http://localhost:5000/graph8';
       axios.get(path)
         .then((res) => {
           // console.log(res.data);
