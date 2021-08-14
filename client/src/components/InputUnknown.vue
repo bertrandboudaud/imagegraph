@@ -1,12 +1,12 @@
 <template>
   <div>
-    <b-alert variant="warning" show>Unknown Output Parameter type: {{parameter_type}}</b-alert>
+    <b-alert variant="warning" show>Unknown Input Parameter type: {{parameter_type}}</b-alert>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'OutputUnknown',
+  name: 'InputUnknown',
   props: ['parameter_id', 'default_value', 'parameter_type'],
   data() {
     return {

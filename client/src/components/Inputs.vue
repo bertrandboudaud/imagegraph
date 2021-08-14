@@ -13,6 +13,7 @@
                     <component :is="displayParameter(input.inputs['default value'])"
                                :default_value="input.inputs['default value']"
                                :parameter_id="index"
+                               :parameter_type="input.inputs['default value'].user_parameter.type"
                                :ref="index">
                     </component>
           </b-form-group>
@@ -29,6 +30,7 @@
 <script>
 import axios from 'axios';
 import InputInteger from '@/components/InputInteger.vue';
+import InputUnknown from '@/components/InputUnknown.vue';
 import InputColor from '@/components/InputColor.vue';
 
 export default {
@@ -41,6 +43,7 @@ export default {
   },
   components: {
     InputInteger,
+    InputUnknown,
   },
   methods: {
     getInputs() {
@@ -68,7 +71,7 @@ export default {
           paramComponent = InputColor;
           break;
         default:
-          paramComponent = 'InputInteger';
+          paramComponent = InputUnknown;
           break;
       }
       this.paramComponents[param.user_parameter.id] = paramComponent;

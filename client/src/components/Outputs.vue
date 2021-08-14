@@ -9,6 +9,7 @@
                       :is="displayParameter(output)"
                       :value="output"
                       :parameter_id="index"
+                      :parameter_type="output.user_parameter.type"
                       :ref="index">
           </component>
       </div>
