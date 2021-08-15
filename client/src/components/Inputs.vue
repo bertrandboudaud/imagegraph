@@ -39,6 +39,7 @@ export default {
     return {
       inputs: [],
       paramComponents: {},
+      graph: 'http://localhost:5000/graph8',
     };
   },
   components: {
@@ -47,10 +48,8 @@ export default {
   },
   methods: {
     getInputs() {
-      const path = 'http://localhost:5000/graph8';
-      axios.get(path)
+      axios.get(this.graph)
         .then((res) => {
-          // console.log(res.data);
           this.inputs = res.data.inputs;
         })
         .catch((error) => {
@@ -78,8 +77,7 @@ export default {
       return paramComponent;
     },
     executeWorkflow(payload) {
-      const path = 'http://localhost:5000/test_create';
-      axios.post(path, payload)
+      axios.post(this.graph, payload)
         .then((response) => {
           console.log(response);
           this.$emit('workflowEnd', response);
@@ -94,7 +92,7 @@ export default {
     onSubmit(evt) {
       evt.preventDefault();
       const payload = {};
-      Object.keys(this.paramComponents).forEach((key) => {
+      Object.keys(this.$refs).forEach((key) => {
         const paramComponent = this.$refs[key][0];
         payload[key] = paramComponent.getValue();
       });
