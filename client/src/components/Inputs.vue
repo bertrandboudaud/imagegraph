@@ -39,7 +39,7 @@ export default {
     return {
       inputs: [],
       paramComponents: {},
-      graph: 'http://localhost:5000/graph8',
+      graph: 'http://localhost:5000/graph/graph8',
     };
   },
   components: {

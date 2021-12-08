@@ -19,11 +19,22 @@ from IGLibrary import *
 def Welcome_page():
     return 'image_graph home page'
 
-@app.route('/<graph_name>', methods = ['GET', 'POST'])
+@app.route('/list')
+def List_page():
+    node_library = IGLibrary([os.path.join(os.path.abspath(os.path.dirname(__file__)), "graphs")])
+    response = []
+    for node_name in node_library.nodes:
+        response.append(node_name)
+    return  jsonify({
+        'status': 'success',
+        'graphs': response
+        })
+
+@app.route('/graph/<graph_name>', methods = ['GET', 'POST'])
 def load_graph(graph_name):
     # will show input of the graph
     fullname = "c:\\tmp\\" + graph_name + ".json" # TODO graph paths
-    node_library = IGLibrary()
+    node_library = IGLibrary([os.path.join(os.path.abspath(os.path.dirname(__file__)), "graphs")])
     iggraph = IGGraph(node_library)
     f=open(fullname)
     iggraph.from_json(json.load(f))

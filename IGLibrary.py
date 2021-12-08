@@ -3,7 +3,7 @@ import sys
 from os.path import dirname
 from IGScriptNode import *
 class IGLibrary:
-    def __init__(self):
+    def __init__(self, script_dirs):
         self.nodes = []
         self.native_nodes = {}
         self.script_nodes = {}
@@ -23,7 +23,6 @@ class IGLibrary:
             self.native_nodes[node_instance.name] = node_module
             self.nodes.append(node_instance.name)
         # scripts nodes
-        script_dirs = ["c:\\tmp\\lib"]
         for script_dir in script_dirs:
             if os.path.exists(script_dir) and os.path.isdir(script_dir):
                 for file in os.listdir(script_dir):
